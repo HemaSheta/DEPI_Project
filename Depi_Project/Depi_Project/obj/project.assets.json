@@ -7690,11 +7690,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\hemas\\OneDrive\\سطح المكتب\\Depi project\\Depi_Project\\Depi_Project\\Depi_Project.csproj",
+      "projectUniqueName": "C:\\Users\\hemas\\OneDrive\\سطح المكتب\\DEPI Grad_Project\\Depi_Project\\Depi_Project\\Depi_Project.csproj",
       "projectName": "Depi_Project",
-      "projectPath": "C:\\Users\\hemas\\OneDrive\\سطح المكتب\\Depi project\\Depi_Project\\Depi_Project\\Depi_Project.csproj",
+      "projectPath": "C:\\Users\\hemas\\OneDrive\\سطح المكتب\\DEPI Grad_Project\\Depi_Project\\Depi_Project\\Depi_Project.csproj",
       "packagesPath": "C:\\Users\\hemas\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\hemas\\OneDrive\\سطح المكتب\\Depi project\\Depi_Project\\Depi_Project\\obj\\",
+      "outputPath": "C:\\Users\\hemas\\OneDrive\\سطح المكتب\\DEPI Grad_Project\\Depi_Project\\Depi_Project\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

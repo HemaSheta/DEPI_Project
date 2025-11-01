@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "lTUk/mCYKXg=",
+  "dgSpecHash": "PoELEeDWgMI=",
   "success": true,
-  "projectFilePath": "C:\\Users\\hemas\\OneDrive\\سطح المكتب\\Depi project\\Depi_Project\\Depi_Project\\Depi_Project.csproj",
+  "projectFilePath": "C:\\Users\\hemas\\OneDrive\\سطح المكتب\\DEPI Grad_Project\\Depi_Project\\Depi_Project\\Depi_Project.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\hemas\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\hemas\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",
