@@ -9,8 +9,10 @@ namespace Depi_Project.Models
         [Required]
         public int RoomId { get; set; }
 
-        [Required]
-        public int UserId { get; set; }
+        public int UserProfileId { get; set; }
+        public UserProfile UserProfile { get; set; }
+        
+
 
         [Required]
         public DateTime CheckTime { get; set; }
@@ -24,5 +26,7 @@ namespace Depi_Project.Models
         [Required]
         [RegularExpression("Paid|Pending", ErrorMessage = "PaymentStatus must be ( Paid , Pending )")]
         public string PaymentStatus { get; set; }
+
+        public Room Room { get; set; }
     }
 }

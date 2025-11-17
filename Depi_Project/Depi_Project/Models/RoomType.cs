@@ -18,5 +18,7 @@ namespace Depi_Project.Models
         [Required]
         public string NumOfPeople { get; set; }
 
+        public ICollection<Room> Rooms { get; set; }
+
     }
 }

@@ -26,8 +26,9 @@ namespace Depi_Project.Models
         [Required]
         public string Slide3 { get; set; }
 
-        // Navigation Properties
-        public ICollection<RoomType> RoomTypes { get; set; }          // RoomType
+
+        public RoomType RoomType { get; set; }
+        public ICollection<Booking> Bookings { get; set; }
 
     }
 }
