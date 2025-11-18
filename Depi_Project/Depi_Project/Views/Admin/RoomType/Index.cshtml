@@ -1,0 +1,36 @@
+﻿@model IEnumerable<Depi_Project.Models.RoomType>
+
+@{
+    ViewData["Title"] = "Room Types";
+}
+
+<h2>Room Types</h2>
+
+<a class="btn btn-primary mb-3" href="/Admin/RoomType/Create">Add New Room Type</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>People</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var t in Model)
+        {
+            <tr>
+                <td>@t.RoomTypeName</td>
+                <td>@t.Description</td>
+                <td>@t.Price</td>
+                <td>@t.NumOfPeople</td>
+                <td>
+                    <a href="/Admin/RoomType/Edit/@t.RoomTypeId" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="/Admin/RoomType/Delete/@t.RoomTypeId" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

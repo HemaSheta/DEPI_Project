@@ -4,6 +4,9 @@ using Depi_Project.Data.Repository.Interfaces;
 using Depi_Project.Data.UnitOfWork;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Depi_Project.Services.Interfaces;
+using Depi_Project.Services.Implementations;
+
 
 namespace Depi_Project
 {
@@ -34,6 +37,20 @@ namespace Depi_Project
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
+
+
+            // Service Layer
+            builder.Services.AddScoped<IRoomService, RoomService>();
+            builder.Services.AddScoped<IRoomTypeService, RoomTypeService>();
+            builder.Services.AddScoped<IBookingService, BookingService>();
+            builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+
+
+            app.MapControllerRoute(
+                name: "admin",
+                pattern: "Admin/{controller=RoomType}/{action=Index}/{id?}");
+
+
 
             // Pipeline
             if (!app.Environment.IsDevelopment())
