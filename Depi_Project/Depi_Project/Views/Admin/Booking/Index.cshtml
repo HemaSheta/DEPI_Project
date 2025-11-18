@@ -1,0 +1,40 @@
+﻿@model IEnumerable<Depi_Project.Models.Booking>
+
+@{
+    ViewData["Title"] = "Bookings";
+}
+
+<h2>Bookings</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Room</th>
+            <th>User Profile ID</th>
+            <th>Check In</th>
+            <th>Check Out</th>
+            <th>Total Price</th>
+            <th>Payment Status</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var b in Model)
+        {
+            <tr>
+                <td>@b.RoomId</td>
+                <td>@b.UserProfileId</td>
+                <td>@b.CheckTime.ToString("yyyy-MM-dd")</td>
+                <td>@b.CheckOutTime.ToString("yyyy-MM-dd")</td>
+                <td>@b.TotalPrice</td>
+                <td>@b.PaymentStatus</td>
+                <td>
+                    <a href="/Admin/Booking/Delete/@b.BookingId" class="btn btn-danger btn-sm">
+                        Cancel
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

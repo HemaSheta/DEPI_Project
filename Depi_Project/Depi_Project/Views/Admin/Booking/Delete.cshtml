@@ -1,0 +1,24 @@
+﻿@model Depi_Project.Models.Booking
+
+@{
+    ViewData["Title"] = "Delete Booking";
+}
+
+<h2>Cancel Booking</h2>
+
+<div class="card p-3 mb-3">
+    <p><strong>Booking ID:</strong> @Model.BookingId</p>
+    <p><strong>Room ID:</strong> @Model.RoomId</p>
+    <p><strong>User Profile ID:</strong> @Model.UserProfileId</p>
+    <p><strong>Check In:</strong> @Model.CheckTime.ToString("yyyy-MM-dd")</p>
+    <p><strong>Check Out:</strong> @Model.CheckOutTime.ToString("yyyy-MM-dd")</p>
+    <p><strong>Total Price:</strong> @Model.TotalPrice</p>
+    <p><strong>Status:</strong> @Model.PaymentStatus</p>
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="BookingId" />
+
+    <button type="submit" class="btn btn-danger">Yes, Cancel Booking</button>
+    <a href="/Admin/Booking" class="btn btn-secondary">Back</a>
+</form>
