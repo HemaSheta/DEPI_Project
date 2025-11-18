@@ -1,0 +1,42 @@
+﻿@model IEnumerable<Depi_Project.Models.Room>
+
+@{
+    ViewData["Title"] = "Rooms";
+}
+
+<h2>Rooms</h2>
+
+<a href="/Admin/Room/Create" class="btn btn-primary mb-3">Add New Room</a>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Room #</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Room Type</th>
+            <th>Slide 1</th>
+            <th>Slide 2</th>
+            <th>Slide 3</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var room in Model)
+        {
+            <tr>
+                <td>@room.RoomNum</td>
+                <td>@room.Description</td>
+                <td>@room.Status</td>
+                <td>@room.RoomType?.RoomTypeName</td>
+                <td><img src="@room.Slide1" width="80" height="60" /></td>
+                <td><img src="@room.Slide2" width="80" height="60" /></td>
+                <td><img src="@room.Slide3" width="80" height="60" /></td>
+                <td>
+                    <a href="/Admin/Room/Edit/@room.RoomId" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="/Admin/Room/Delete/@room.RoomId" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

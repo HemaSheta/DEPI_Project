@@ -1,0 +1,62 @@
+﻿@model Depi_Project.Models.Room
+
+@{
+    ViewData["Title"] = "Create Room";
+}
+
+<h2>Create Room</h2>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+
+    <div class="form-group">
+        <label>Room Number</label>
+        <input asp-for="RoomNum" class="form-control" />
+        <span asp-validation-for="RoomNum" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Description</label>
+        <input asp-for="Description" class="form-control" />
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Status</label>
+        <select asp-for="Status" class="form-control">
+            <option>Available</option>
+            <option>Booked</option>
+            <option>Full</option>
+        </select>
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Room Type</label>
+        <select asp-for="RoomTypeId" class="form-control">
+            @foreach (var type in ViewBag.RoomTypes)
+            {
+                <option value="@type.RoomTypeId">@type.RoomTypeName</option>
+            }
+        </select>
+        <span asp-validation-for="RoomTypeId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Slide 1</label>
+        <input type="file" name="Slide1File" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label>Slide 2</label>
+        <input type="file" name="Slide2File" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label>Slide 3</label>
+        <input type="file" name="Slide3File" class="form-control" required />
+    </div>
+
+    <button class="btn btn-success mt-3">Create</button>
+    <a href="/Admin/Room" class="btn btn-secondary mt-3">Cancel</a>
+
+</form>
