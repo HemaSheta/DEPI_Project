@@ -6,6 +6,20 @@
 
 <div class="container mt-4" style="max-width: 900px;">
     <h2 class="mb-4 text-center fw-bold" style="font-size: 2rem;">Create Room</h2>
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <ul class="alert alert-danger">
+            @foreach (var state in ViewData.ModelState)
+            {
+                foreach (var error in state.Value.Errors)
+                {
+                    <li><strong>@state.Key</strong>: @error.ErrorMessage</li>
+                }
+            }
+        </ul>
+    }
+
+
 
     <div class="card shadow-sm p-4">
         <form asp-action="Create" method="post" enctype="multipart/form-data">

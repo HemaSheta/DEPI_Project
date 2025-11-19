@@ -22,10 +22,10 @@ namespace Depi_Project.Models
 
         [Required]
         public string Slide1 { get; set; }
-        public string Slide2 { get; set; }
-        public string Slide3 { get; set; }
 
-        // Navigation Properties
+        public string? Slide2 { get; set; }
+        public string? Slide3 { get; set; }
+
         public RoomType RoomType { get; set; }
 
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();

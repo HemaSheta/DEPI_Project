@@ -15,8 +15,20 @@ namespace Depi_Project.Services.Implementations
 
         public IEnumerable<Room> GetAllRooms()
         {
-            return _unitOfWork.Rooms.GetAll();
+            return _unitOfWork.Rooms.GetAll()
+                .Join(
+                    _unitOfWork.RoomTypes.GetAll(),
+                    room => room.RoomTypeId,
+                    type => type.RoomTypeId,
+                    (room, type) =>
+                    {
+                        room.RoomType = type;
+                        return room;
+                    }
+                )
+                .ToList();
         }
+
 
         public Room GetRoomById(int id)
         {

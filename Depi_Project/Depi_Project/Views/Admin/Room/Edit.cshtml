@@ -4,65 +4,83 @@
     ViewData["Title"] = "Edit Room";
 }
 
-<h2>Edit Room</h2>
+<div class="container mt-4" style="max-width: 900px;">
+    <h2 class="mb-4 text-center fw-bold" style="font-size: 2rem;">Edit Room</h2>
 
-<form asp-action="Edit" method="post" enctype="multipart/form-data">
+    <div class="card shadow-sm p-4">
 
-    <input type="hidden" asp-for="RoomId" />
+        <!-- FIXED: Correct Route -->
+        <form method="post"
+              asp-controller="Room"
+              asp-action="Edit"
+              asp-route-area="Admin"
+              asp-route-id="@Model.RoomId"
+              enctype="multipart/form-data">
 
-    <div class="form-group">
-        <label>Room Number</label>
-        <input asp-for="RoomNum" class="form-control" />
-        <span asp-validation-for="RoomNum" class="text-danger"></span>
+            <input type="hidden" asp-for="RoomId" />
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-semibold">Room Number</label>
+                    <input asp-for="RoomNum" class="form-control" />
+                    <span asp-validation-for="RoomNum" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-semibold">Status</label>
+                    <select asp-for="Status" class="form-control">
+                        <option value="Available">Available</option>
+                        <option value="Booked">Booked</option>
+                        <option value="Full">Full</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Description</label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Room Type</label>
+                <select asp-for="RoomTypeId" class="form-control">
+                    @foreach (var type in ViewBag.RoomTypes)
+                    {
+                        <option value="@type.RoomTypeId"
+                                selected="@(type.RoomTypeId == Model.RoomTypeId)">
+                            @type.RoomTypeName
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <label class="form-label fw-semibold">Current Slide 1</label><br />
+                    <img src="@Model.Slide1" width="140" class="rounded shadow mb-2" />
+                    <input type="file" name="Slide1File" class="form-control" />
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <label class="form-label fw-semibold">Current Slide 2</label><br />
+                    <img src="@Model.Slide2" width="140" class="rounded shadow mb-2" />
+                    <input type="file" name="Slide2File" class="form-control" />
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <label class="form-label fw-semibold">Current Slide 3</label><br />
+                    <img src="@Model.Slide3" width="140" class="rounded shadow mb-2" />
+                    <input type="file" name="Slide3File" class="form-control" />
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="/Admin/Room" class="btn btn-secondary px-4">Cancel</a>
+                <button class="btn btn-warning px-4" type="submit">Save Changes</button>
+            </div>
+
+        </form>
+
     </div>
-
-    <div class="form-group">
-        <label>Description</label>
-        <input asp-for="Description" class="form-control" />
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label>Status</label>
-        <select asp-for="Status" class="form-control">
-            <option>Available</option>
-            <option>Booked</option>
-            <option>Full</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Room Type</label>
-        <select asp-for="RoomTypeId" class="form-control">
-            @foreach (var type in ViewBag.RoomTypes)
-            {
-                <option value="@type.RoomTypeId"
-                        selected="@(type.RoomTypeId == Model.RoomTypeId)">
-                    @type.RoomTypeName
-                </option>
-            }
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Current Slide 1</label><br />
-        <img src="@Model.Slide1" width="120" />
-        <input type="file" name="Slide1File" class="form-control mt-2" />
-    </div>
-
-    <div class="form-group">
-        <label>Current Slide 2</label><br />
-        <img src="@Model.Slide2" width="120" />
-        <input type="file" name="Slide2File" class="form-control mt-2" />
-    </div>
-
-    <div class="form-group">
-        <label>Current Slide 3</label><br />
-        <img src="@Model.Slide3" width="120" />
-        <input type="file" name="Slide3File" class="form-control mt-2" />
-    </div>
-
-    <button class="btn btn-warning mt-3">Save Changes</button>
-    <a href="/Admin/Room" class="btn btn-secondary mt-3">Cancel</a>
-
-</form>
+</div>

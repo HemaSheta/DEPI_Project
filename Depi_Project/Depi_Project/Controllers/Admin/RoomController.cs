@@ -37,14 +37,20 @@ namespace Depi_Project.Controllers.Admin
         [ValidateAntiForgeryToken]
         public IActionResult Create(Room room, IFormFile Slide1File, IFormFile Slide2File, IFormFile Slide3File)
         {
-            // Remove file-backed properties from ModelState so they don't make ModelState invalid
-            // (they will be set after the files are saved)
-            ModelState.Remove(nameof(room.Slide1));
-            ModelState.Remove(nameof(room.Slide2));
-            ModelState.Remove(nameof(room.Slide3));
+            ModelState.Remove("RoomType");
+            ModelState.Remove("Slide1");
+            ModelState.Remove("Slide2");
+            ModelState.Remove("Slide3");
 
             if (!ModelState.IsValid)
             {
+                ViewBag.RoomTypes = _roomTypeService.GetAllRoomTypes();
+                return View("~/Views/Admin/Room/Create.cshtml", room);
+            }
+
+            if (Slide1File == null)
+            {
+                ModelState.AddModelError("Slide1File", "Slide 1 is required.");
                 ViewBag.RoomTypes = _roomTypeService.GetAllRoomTypes();
                 return View("~/Views/Admin/Room/Create.cshtml", room);
             }
@@ -53,38 +59,40 @@ namespace Depi_Project.Controllers.Admin
             Directory.CreateDirectory(folder);
 
             // Slide1
-            if (Slide1File != null && Slide1File.Length > 0)
-            {
-                var safeName = Path.GetFileName(Slide1File.FileName);
-                string path1 = Path.Combine(folder, safeName);
-                using var stream = new FileStream(path1, FileMode.Create);
-                Slide1File.CopyTo(stream);
-                room.Slide1 = "/images/rooms/" + safeName;
-            }
+            var f1 = Path.GetFileName(Slide1File.FileName);
+            var p1 = Path.Combine(folder, f1);
+            using (var st = new FileStream(p1, FileMode.Create))
+                Slide1File.CopyTo(st);
+            room.Slide1 = "/images/rooms/" + f1;
 
             // Slide2
-            if (Slide2File != null && Slide2File.Length > 0)
+            if (Slide2File != null)
             {
-                var safeName = Path.GetFileName(Slide2File.FileName);
-                string path2 = Path.Combine(folder, safeName);
-                using var stream = new FileStream(path2, FileMode.Create);
-                Slide2File.CopyTo(stream);
-                room.Slide2 = "/images/rooms/" + safeName;
+                var f2 = Path.GetFileName(Slide2File.FileName);
+                var p2 = Path.Combine(folder, f2);
+                using (var st = new FileStream(p2, FileMode.Create))
+                    Slide2File.CopyTo(st);
+                room.Slide2 = "/images/rooms/" + f2;
             }
 
             // Slide3
-            if (Slide3File != null && Slide3File.Length > 0)
+            if (Slide3File != null)
             {
-                var safeName = Path.GetFileName(Slide3File.FileName);
-                string path3 = Path.Combine(folder, safeName);
-                using var stream = new FileStream(path3, FileMode.Create);
-                Slide3File.CopyTo(stream);
-                room.Slide3 = "/images/rooms/" + safeName;
+                var f3 = Path.GetFileName(Slide3File.FileName);
+                var p3 = Path.Combine(folder, f3);
+                using (var st = new FileStream(p3, FileMode.Create))
+                    Slide3File.CopyTo(st);
+                room.Slide3 = "/images/rooms/" + f3;
             }
 
             _roomService.CreateRoom(room);
-            return RedirectToAction("Index");
+            return Redirect("/Admin/Room");
         }
+
+
+        // ============================
+        // EDIT — FIXED HERE 🔥
+        // ============================
 
         [HttpGet("Edit/{id}")]
         public IActionResult Edit(int id)
@@ -96,43 +104,60 @@ namespace Depi_Project.Controllers.Admin
             return View("~/Views/Admin/Room/Edit.cshtml", room);
         }
 
-        [HttpPost("Edit")]
+        [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Room room, IFormFile? Slide1File, IFormFile? Slide2File, IFormFile? Slide3File)
+        public IActionResult Edit(int id, Room formModel, IFormFile? Slide1File, IFormFile? Slide2File, IFormFile? Slide3File)
         {
+            var room = _roomService.GetRoomById(id);
+            if (room == null) return NotFound();
+
+            // Update basic fields
+            room.RoomNum = formModel.RoomNum;
+            room.Status = formModel.Status;
+            room.Description = formModel.Description;
+            room.RoomTypeId = formModel.RoomTypeId;
+
             string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/rooms");
             Directory.CreateDirectory(folder);
 
-            if (Slide1File != null && Slide1File.Length > 0)
+            // Slide1
+            if (Slide1File != null)
             {
-                var safeName = Path.GetFileName(Slide1File.FileName);
-                string path = Path.Combine(folder, safeName);
-                using var stream = new FileStream(path, FileMode.Create);
-                Slide1File.CopyTo(stream);
-                room.Slide1 = "/images/rooms/" + safeName;
+                var f1 = Path.GetFileName(Slide1File.FileName);
+                var p1 = Path.Combine(folder, f1);
+                using (var st = new FileStream(p1, FileMode.Create))
+                    Slide1File.CopyTo(st);
+                room.Slide1 = "/images/rooms/" + f1;
             }
 
-            if (Slide2File != null && Slide2File.Length > 0)
+            // Slide2
+            if (Slide2File != null)
             {
-                var safeName = Path.GetFileName(Slide2File.FileName);
-                string path = Path.Combine(folder, safeName);
-                using var stream = new FileStream(path, FileMode.Create);
-                Slide2File.CopyTo(stream);
-                room.Slide2 = "/images/rooms/" + safeName;
+                var f2 = Path.GetFileName(Slide2File.FileName);
+                var p2 = Path.Combine(folder, f2);
+                using (var st = new FileStream(p2, FileMode.Create))
+                    Slide2File.CopyTo(st);
+                room.Slide2 = "/images/rooms/" + f2;
             }
 
-            if (Slide3File != null && Slide3File.Length > 0)
+            // Slide3
+            if (Slide3File != null)
             {
-                var safeName = Path.GetFileName(Slide3File.FileName);
-                string path = Path.Combine(folder, safeName);
-                using var stream = new FileStream(path, FileMode.Create);
-                Slide3File.CopyTo(stream);
-                room.Slide3 = "/images/rooms/" + safeName;
+                var f3 = Path.GetFileName(Slide3File.FileName);
+                var p3 = Path.Combine(folder, f3);
+                using (var st = new FileStream(p3, FileMode.Create))
+                    Slide3File.CopyTo(st);
+                room.Slide3 = "/images/rooms/" + f3;
             }
 
             _roomService.UpdateRoom(room);
-            return RedirectToAction("Index");
+            return Redirect("/Admin/Room");
         }
+
+
+        // ============================
+        // DELETE — FIXED HERE 🔥
+        // ============================
 
         [HttpGet("Delete/{id}")]
         public IActionResult Delete(int id)
@@ -143,12 +168,12 @@ namespace Depi_Project.Controllers.Admin
             return View("~/Views/Admin/Room/Delete.cshtml", room);
         }
 
-        [HttpPost("Delete")]
+        [HttpPost("Delete/{id}")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
             _roomService.DeleteRoom(id);
-            return RedirectToAction("Index");
+            return Redirect("/Admin/Room");
         }
     }
 }

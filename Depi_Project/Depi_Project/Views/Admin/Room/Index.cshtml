@@ -21,6 +21,7 @@
                     <th>Description</th>
                     <th>Status</th>
                     <th>Room Type</th>
+                    <th>Price</th>
                     <th class="text-center">Slide 1</th>
                     <th class="text-center">Slide 2</th>
                     <th class="text-center">Slide 3</th>
@@ -34,6 +35,7 @@
                     <tr>
                         <td>@room.RoomNum</td>
                         <td>@room.Description</td>
+
                         <td>
                             <span class="badge
                                     @(room.Status == "Available" ? "bg-success" :
@@ -42,7 +44,9 @@
                             @room.Status
                         </span>
                     </td>
-                    <td>@room.RoomType?.RoomTypeName</td>
+
+                        <td>@room.RoomType?.RoomTypeName</td>
+                        <td>@room.RoomType?.Price</td>
 
                         <td class="text-center">
                             <img src="@room.Slide1" width="80" height="60" class="rounded" />
