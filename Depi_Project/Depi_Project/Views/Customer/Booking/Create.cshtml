@@ -1,0 +1,96 @@
+﻿@model Depi_Project.Models.Booking
+@using Depi_Project.Models
+@inject Microsoft.Extensions.Options.IOptions<StripeSettings> StripeOptions
+
+@{
+    var room = ViewBag.Room as Room;
+    ViewData["Title"] = "Book Room";
+
+    // Stripe publishable key (from appsettings)
+    var stripePublishableKey = StripeOptions.Value.PublishableKey;
+}
+
+<h2>Book Room @room.RoomNum – @room.RoomType.RoomTypeName</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<form id="bookingForm">
+
+    <input type="hidden" id="RoomId" value="@room.RoomId" />
+
+    <div class="form-group">
+        <label>Check In</label>
+        <input asp-for="CheckTime" type="date" class="form-control" id="checkIn" required />
+    </div>
+
+    <div class="form-group">
+        <label>Check Out</label>
+        <input asp-for="CheckOutTime" type="date" class="form-control" id="checkOut" required />
+    </div>
+
+    <div class="form-group mt-3">
+        <label>Total Price</label>
+        <input asp-for="TotalPrice" class="form-control" id="totalPrice" readonly />
+    </div>
+
+    <!-- STRIPE BUTTON -->
+    <button type="button" class="btn btn-success mt-3" onclick="startCheckout()">Proceed to Payment</button>
+
+</form>
+
+<!-- Stripe JS Library -->
+<script src="https://js.stripe.com/v3/"></script>
+
+<script>
+    document.getElementById("checkOut").addEventListener("change", calculatePrice);
+    document.getElementById("checkIn").addEventListener("change", calculatePrice);
+
+    function calculatePrice() {
+        let checkIn = new Date(document.getElementById("checkIn").value);
+        let checkOut = new Date(document.getElementById("checkOut").value);
+
+        if (checkOut > checkIn) {
+            let diffTime = Math.abs(checkOut - checkIn);
+            let nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            let pricePerNight = @room.RoomType.Price;
+            let total = nights * pricePerNight;
+
+            document.getElementById("totalPrice").value = total;
+        }
+    }
+
+    async function startCheckout() {
+        let roomId = document.getElementById("RoomId").value;
+        let checkIn = document.getElementById("checkIn").value;
+        let checkOut = document.getElementById("checkOut").value;
+        let totalPrice = document.getElementById("totalPrice").value;
+
+        if (!checkIn || !checkOut || totalPrice <= 0) {
+            alert("Please select valid dates first.");
+            return;
+        }
+
+        const stripe = Stripe("@stripePublishableKey");
+
+        // Create Checkout Session via AJAX
+        const response = await fetch("/Customer/Payments/CreateCheckoutSession", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                roomId: roomId,
+                checkIn: checkIn,
+                checkOut: checkOut,
+                totalPrice: totalPrice
+            })
+        });
+
+        const session = await response.json();
+
+        // Redirect to Stripe Checkout
+        await stripe.redirectToCheckout({ sessionId: session.id });
+    }
+</script>

@@ -23,7 +23,7 @@ namespace Depi_Project.Services.Implementations
             return _unitOfWork.Bookings.GetById(id);
         }
 
-        // IMPORTANT BUSINESS LOGIC
+        // Check if room is free during a specific date range
         public bool IsRoomAvailable(int roomId, DateTime checkIn, DateTime checkOut)
         {
             var bookings = _unitOfWork.Bookings
@@ -32,7 +32,6 @@ namespace Depi_Project.Services.Implementations
 
             foreach (var b in bookings)
             {
-                // Overlap rule
                 bool overlaps =
                     checkIn < b.CheckOutTime &&
                     checkOut > b.CheckTime;
@@ -46,14 +45,29 @@ namespace Depi_Project.Services.Implementations
 
         public bool CreateBooking(Booking booking)
         {
-            // Check availability first
+            // ⭐ Prevent user from booking overlapping dates
+            var userBookings = _unitOfWork.Bookings
+                .GetAll()
+                .Where(b => b.IdentityUserId == booking.IdentityUserId);
+
+            foreach (var b in userBookings)
+            {
+                bool overlaps =
+                    booking.CheckTime < b.CheckOutTime &&
+                    booking.CheckOutTime > b.CheckTime;
+
+                if (overlaps)
+                    return false;
+            }
+
+            // ⭐ Check room availability
             if (!IsRoomAvailable(booking.RoomId, booking.CheckTime, booking.CheckOutTime))
                 return false;
 
-            // Add booking
+            // ⭐ Add booking
             _unitOfWork.Bookings.Add(booking);
 
-            // Change room status to Booked
+            // ⭐ Change room status to Booked
             var room = _unitOfWork.Rooms.GetById(booking.RoomId);
             if (room != null)
             {

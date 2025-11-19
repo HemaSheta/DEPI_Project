@@ -1,8 +1,11 @@
 ﻿using Depi_Project.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Depi_Project.Controllers.Admin
 {
+    [Authorize]
+    [AdminOnly]
     public class BookingController : Controller
     {
         private readonly IBookingService _bookingService;

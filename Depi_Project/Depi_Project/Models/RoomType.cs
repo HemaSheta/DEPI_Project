@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Depi_Project.Models
 {
@@ -18,7 +19,7 @@ namespace Depi_Project.Models
         [Required]
         public string NumOfPeople { get; set; }
 
-        public ICollection<Room> Rooms { get; set; }
-
+        // Navigation
+        public ICollection<Room> Rooms { get; set; } = new List<Room>();
     }
 }

@@ -112,8 +112,8 @@ namespace Depi_Project.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    ProviderKey = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
@@ -157,8 +157,8 @@ namespace Depi_Project.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -167,25 +167,6 @@ namespace Depi_Project.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetUserTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserProfiles",
-                columns: table => new
-                {
-                    UserProfileId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    IdentityUserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserProfiles", x => x.UserProfileId);
-                    table.ForeignKey(
-                        name: "FK_UserProfiles_AspNetUsers_IdentityUserId",
-                        column: x => x.IdentityUserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -223,7 +204,8 @@ namespace Depi_Project.Migrations
                     BookingId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     RoomId = table.Column<int>(type: "int", nullable: false),
-                    UserProfileId = table.Column<int>(type: "int", nullable: false),
+                    IdentityUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IdentityUserId1 = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CheckTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CheckOutTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TotalPrice = table.Column<float>(type: "real", nullable: false),
@@ -233,16 +215,22 @@ namespace Depi_Project.Migrations
                 {
                     table.PrimaryKey("PK_Bookings", x => x.BookingId);
                     table.ForeignKey(
+                        name: "FK_Bookings_AspNetUsers_IdentityUserId",
+                        column: x => x.IdentityUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Bookings_AspNetUsers_IdentityUserId1",
+                        column: x => x.IdentityUserId1,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_Bookings_Rooms_RoomId",
                         column: x => x.RoomId,
                         principalTable: "Rooms",
                         principalColumn: "RoomId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Bookings_UserProfiles_UserProfileId",
-                        column: x => x.UserProfileId,
-                        principalTable: "UserProfiles",
-                        principalColumn: "UserProfileId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -286,25 +274,24 @@ namespace Depi_Project.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Bookings_IdentityUserId",
+                table: "Bookings",
+                column: "IdentityUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Bookings_IdentityUserId1",
+                table: "Bookings",
+                column: "IdentityUserId1");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Bookings_RoomId",
                 table: "Bookings",
                 column: "RoomId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Bookings_UserProfileId",
-                table: "Bookings",
-                column: "UserProfileId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Rooms_RoomTypeId",
                 table: "Rooms",
                 column: "RoomTypeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserProfiles_IdentityUserId",
-                table: "UserProfiles",
-                column: "IdentityUserId",
-                unique: true);
         }
 
         /// <inheritdoc />
@@ -332,16 +319,13 @@ namespace Depi_Project.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
                 name: "Rooms");
 
             migrationBuilder.DropTable(
-                name: "UserProfiles");
-
-            migrationBuilder.DropTable(
                 name: "RoomTypes");
-
-            migrationBuilder.DropTable(
-                name: "AspNetUsers");
         }
     }
 }

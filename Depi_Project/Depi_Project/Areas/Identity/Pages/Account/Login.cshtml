@@ -1,0 +1,113 @@
+﻿@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #3A8DFF, #6CC3FF);
+        background-attachment: fixed;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .login-container {
+        max-width: 430px;
+        margin: 70px auto;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 35px 30px;
+        border-radius: 15px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        animation: fadeIn 0.7s ease-out;
+    }
+
+    .login-title {
+        text-align: center;
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 25px;
+        color: #2a2a2a;
+    }
+
+    .btn-login {
+        background-color: #3A8DFF;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 17px;
+        font-weight: 600;
+    }
+
+        .btn-login:hover {
+            background-color: #1f75ff;
+        }
+
+    .form-floating > label {
+        font-weight: 500;
+    }
+
+    a {
+        color: #1366d6;
+    }
+
+        a:hover {
+            color: #004aad;
+            text-decoration: none;
+        }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+</style>
+
+<div class="login-container">
+    <h2 class="login-title">Login</h2>
+
+    <form id="account" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger text-center mb-2" role="alert"></div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="Input.Email" class="form-control" placeholder="name@example.com" autocomplete="username" />
+            <label asp-for="Input.Email">Email</label>
+            <span asp-validation-for="Input.Email" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="Input.Password" class="form-control" placeholder="password" autocomplete="current-password" />
+            <label asp-for="Input.Password">Password</label>
+            <span asp-validation-for="Input.Password" class="text-danger"></span>
+        </div>
+
+        <div class="form-check mb-4">
+            <input class="form-check-input" asp-for="Input.RememberMe" />
+            <label class="form-check-label" asp-for="Input.RememberMe">
+                @Html.DisplayNameFor(m => m.Input.RememberMe)
+            </label>
+        </div>
+
+        <button id="login-submit" type="submit" class="w-100 btn btn-login text-white">
+            Log In
+        </button>
+
+        <div class="mt-4 text-center">
+            <a asp-page="./ForgotPassword">Forgot your password?</a><br />
+            <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Create a new account</a><br />
+            <a asp-page="./ResendEmailConfirmation">Resend confirmation email</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

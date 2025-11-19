@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Depi_Project.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251117143906_InitialCreate")]
+    [Migration("20251119143843_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -39,6 +39,14 @@ namespace Depi_Project.Migrations
                     b.Property<DateTime>("CheckTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("IdentityUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("IdentityUserId1")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -49,14 +57,13 @@ namespace Depi_Project.Migrations
                     b.Property<float>("TotalPrice")
                         .HasColumnType("real");
 
-                    b.Property<int>("UserProfileId")
-                        .HasColumnType("int");
-
                     b.HasKey("BookingId");
 
-                    b.HasIndex("RoomId");
+                    b.HasIndex("IdentityUserId");
 
-                    b.HasIndex("UserProfileId");
+                    b.HasIndex("IdentityUserId1");
+
+                    b.HasIndex("RoomId");
 
                     b.ToTable("Bookings");
                 });
@@ -128,26 +135,6 @@ namespace Depi_Project.Migrations
                     b.HasKey("RoomTypeId");
 
                     b.ToTable("RoomTypes");
-                });
-
-            modelBuilder.Entity("Depi_Project.Models.UserProfile", b =>
-                {
-                    b.Property<int>("UserProfileId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserProfileId"));
-
-                    b.Property<string>("IdentityUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("UserProfileId");
-
-                    b.HasIndex("IdentityUserId")
-                        .IsUnique();
-
-                    b.ToTable("UserProfiles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -295,10 +282,12 @@ namespace Depi_Project.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
@@ -335,10 +324,12 @@ namespace Depi_Project.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -350,21 +341,27 @@ namespace Depi_Project.Migrations
 
             modelBuilder.Entity("Depi_Project.Models.Booking", b =>
                 {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                        .WithMany()
+                        .HasForeignKey("IdentityUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "IdentityUser")
+                        .WithMany()
+                        .HasForeignKey("IdentityUserId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Depi_Project.Models.Room", "Room")
                         .WithMany("Bookings")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Depi_Project.Models.UserProfile", "UserProfile")
-                        .WithMany("Bookings")
-                        .HasForeignKey("UserProfileId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("IdentityUser");
 
                     b.Navigation("Room");
-
-                    b.Navigation("UserProfile");
                 });
 
             modelBuilder.Entity("Depi_Project.Models.Room", b =>
@@ -376,17 +373,6 @@ namespace Depi_Project.Migrations
                         .IsRequired();
 
                     b.Navigation("RoomType");
-                });
-
-            modelBuilder.Entity("Depi_Project.Models.UserProfile", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "IdentityUser")
-                        .WithOne()
-                        .HasForeignKey("Depi_Project.Models.UserProfile", "IdentityUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("IdentityUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -448,11 +434,6 @@ namespace Depi_Project.Migrations
             modelBuilder.Entity("Depi_Project.Models.RoomType", b =>
                 {
                     b.Navigation("Rooms");
-                });
-
-            modelBuilder.Entity("Depi_Project.Models.UserProfile", b =>
-                {
-                    b.Navigation("Bookings");
                 });
 #pragma warning restore 612, 618
         }

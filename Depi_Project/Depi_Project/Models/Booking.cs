@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace Depi_Project.Models
 {
@@ -9,10 +11,12 @@ namespace Depi_Project.Models
         [Required]
         public int RoomId { get; set; }
 
-        public int UserProfileId { get; set; }
-        public UserProfile UserProfile { get; set; }
-        
+        // Use IdentityUser's Id (string) as the FK
+        [Required]
+        public string IdentityUserId { get; set; }
 
+        // Navigation
+        public virtual Microsoft.AspNetCore.Identity.IdentityUser IdentityUser { get; set; }
 
         [Required]
         public DateTime CheckTime { get; set; }
@@ -25,7 +29,7 @@ namespace Depi_Project.Models
 
         [Required]
         [RegularExpression("Paid|Pending", ErrorMessage = "PaymentStatus must be ( Paid , Pending )")]
-        public string PaymentStatus { get; set; }
+        public string PaymentStatus { get; set; } = "Pending";
 
         public Room Room { get; set; }
     }

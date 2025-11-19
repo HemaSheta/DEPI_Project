@@ -1,0 +1,29 @@
+﻿@model IEnumerable<Depi_Project.Models.Room>
+
+@{
+    ViewData["Title"] = "Available Rooms";
+}
+
+<h2 class="mb-4">Available Rooms</h2>
+
+<div class="row">
+    @foreach (var room in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <img class="card-img-top" src="@room.Slide1" style="height:200px; object-fit:cover;" />
+
+                <div class="card-body">
+                    <h5 class="card-title">Room @room.RoomNum</h5>
+                    <p>@room.Description</p>
+                    <p><strong>Type:</strong> @room.RoomType?.RoomTypeName</p>
+                    <p><strong>Price:</strong> @room.RoomType?.Price</p>
+
+                    <a href="/Customer/Room/Details/@room.RoomId" class="btn btn-primary btn-block">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

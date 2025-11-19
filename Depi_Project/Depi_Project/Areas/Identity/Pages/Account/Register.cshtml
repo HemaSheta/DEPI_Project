@@ -1,0 +1,110 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #3A8DFF, #6CC3FF);
+        background-attachment: fixed;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .register-container {
+        max-width: 430px;
+        margin: 60px auto;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 35px 30px;
+        border-radius: 15px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        animation: fadeIn 0.7s ease-out;
+    }
+
+    .register-title {
+        text-align: center;
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 25px;
+        color: #2a2a2a;
+    }
+
+    .btn-register {
+        background-color: #3A8DFF;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 17px;
+        font-weight: 600;
+    }
+
+        .btn-register:hover {
+            background-color: #1f75ff;
+        }
+
+    .form-floating > label {
+        font-weight: 500;
+    }
+
+    a {
+        color: #1366d6;
+    }
+
+        a:hover {
+            color: #004aad;
+            text-decoration: none;
+        }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+</style>
+
+<div class="register-container">
+    <h2 class="register-title">Create Account</h2>
+
+    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger text-center mb-2" role="alert"></div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="Input.Email" class="form-control" placeholder="name@example.com" autocomplete="username" />
+            <label asp-for="Input.Email">Email</label>
+            <span asp-validation-for="Input.Email" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="Input.Password" class="form-control" placeholder="password" autocomplete="new-password" />
+            <label asp-for="Input.Password">Password</label>
+            <span asp-validation-for="Input.Password" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="Input.ConfirmPassword" class="form-control" placeholder="confirm password" autocomplete="new-password" />
+            <label asp-for="Input.ConfirmPassword">Confirm Password</label>
+            <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+        </div>
+
+        <button id="registerSubmit" type="submit" class="w-100 btn btn-register text-white">
+            Register
+        </button>
+
+        <div class="mt-4 text-center">
+            <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Already have an account? Login</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

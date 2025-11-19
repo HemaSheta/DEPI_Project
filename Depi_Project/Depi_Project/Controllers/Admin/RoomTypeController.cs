@@ -1,9 +1,12 @@
-﻿using Depi_Project.Services.Interfaces;
-using Depi_Project.Models;
+﻿using Depi_Project.Models;
+using Depi_Project.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Depi_Project.Controllers.Admin
 {
+    [Authorize]
+    [AdminOnly]
     public class RoomTypeController : Controller
     {
         private readonly IRoomTypeService _roomTypeService;

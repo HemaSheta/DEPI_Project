@@ -5,15 +5,13 @@ using Depi_Project.Models;
 
 namespace Depi_Project.Data
 {
-    public class AppDbContext : IdentityDbContext<IdentityUser>
+    public class AppDbContext : IdentityDbContext<IdentityUser, IdentityRole, string>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
         }
 
-        // DbSets will go here
-        public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<RoomType> RoomTypes { get; set; }
         public DbSet<Room> Rooms { get; set; }
         public DbSet<Booking> Bookings { get; set; }
@@ -22,34 +20,26 @@ namespace Depi_Project.Data
         {
             base.OnModelCreating(builder);
 
-            // Relationships will go here
-
+            // RoomType -> Rooms
             builder.Entity<Room>()
                 .HasOne(r => r.RoomType)
                 .WithMany(rt => rt.Rooms)
                 .HasForeignKey(r => r.RoomTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Booking -> Room
             builder.Entity<Booking>()
                 .HasOne(b => b.Room)
                 .WithMany(r => r.Bookings)
                 .HasForeignKey(b => b.RoomId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Booking -> IdentityUser
             builder.Entity<Booking>()
-                .HasOne(b => b.UserProfile)
-                .WithMany(up => up.Bookings)
-                .HasForeignKey(b => b.UserProfileId)
+                .HasOne<IdentityUser>()
+                .WithMany()
+                .HasForeignKey(b => b.IdentityUserId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-
-            builder.Entity<UserProfile>()
-                .HasOne(up => up.IdentityUser)
-                .WithOne()
-                .HasForeignKey<UserProfile>(up => up.IdentityUserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-
         }
     }
 }
