@@ -7,6 +7,7 @@ namespace Depi_Project.Controllers.Admin
 {
     [Authorize]
     [AdminOnly]
+    [Route("Admin/RoomType")]
     public class RoomTypeController : Controller
     {
         private readonly IRoomTypeService _roomTypeService;
@@ -16,21 +17,20 @@ namespace Depi_Project.Controllers.Admin
             _roomTypeService = roomTypeService;
         }
 
-        // GET: /Admin/RoomType/
+        [HttpGet("")]
         public IActionResult Index()
         {
             var types = _roomTypeService.GetAllRoomTypes();
-            return View(types);
+            return View("~/Views/Admin/RoomType/Index.cshtml", types);
         }
 
-        // GET: /Admin/RoomType/Create
+        [HttpGet("Create")]
         public IActionResult Create()
         {
-            return View();
+            return View("~/Views/Admin/RoomType/Create.cshtml");
         }
 
-        // POST: /Admin/RoomType/Create
-        [HttpPost]
+        [HttpPost("Create")]
         [ValidateAntiForgeryToken]
         public IActionResult Create(RoomType roomType)
         {
@@ -39,21 +39,21 @@ namespace Depi_Project.Controllers.Admin
                 _roomTypeService.CreateRoomType(roomType);
                 return RedirectToAction("Index");
             }
-            return View(roomType);
+
+            return View("~/Views/Admin/RoomType/Create.cshtml", roomType);
         }
 
-        // GET: /Admin/RoomType/Edit/5
+        [HttpGet("Edit/{id}")]
         public IActionResult Edit(int id)
         {
             var type = _roomTypeService.GetRoomTypeById(id);
             if (type == null)
                 return NotFound();
 
-            return View(type);
+            return View("~/Views/Admin/RoomType/Edit.cshtml", type);
         }
 
-        // POST: /Admin/RoomType/Edit
-        [HttpPost]
+        [HttpPost("Edit")]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(RoomType roomType)
         {
@@ -62,21 +62,21 @@ namespace Depi_Project.Controllers.Admin
                 _roomTypeService.UpdateRoomType(roomType);
                 return RedirectToAction("Index");
             }
-            return View(roomType);
+
+            return View("~/Views/Admin/RoomType/Edit.cshtml", roomType);
         }
 
-        // GET: /Admin/RoomType/Delete/5
+        [HttpGet("Delete/{id}")]
         public IActionResult Delete(int id)
         {
             var type = _roomTypeService.GetRoomTypeById(id);
             if (type == null)
                 return NotFound();
 
-            return View(type);
+            return View("~/Views/Admin/RoomType/Delete.cshtml", type);
         }
 
-        // POST: /Admin/RoomType/Delete
-        [HttpPost, ActionName("Delete")]
+        [HttpPost("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {

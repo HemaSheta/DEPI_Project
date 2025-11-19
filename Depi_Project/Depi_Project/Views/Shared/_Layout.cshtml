@@ -26,7 +26,7 @@
 
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 
-                    <!-- LEFT SIDE MENU -->
+                    <!-- LEFT MENU -->
                     <ul class="navbar-nav flex-grow-1">
 
                         <li class="nav-item">
@@ -49,7 +49,7 @@
 
                     </ul>
 
-                    <!-- RIGHT SIDE AUTH & ADMIN -->
+                    <!-- RIGHT MENU (LOGIN + ADMIN) -->
                     <ul class="navbar-nav ms-auto">
 
                         @if (SignInManager.IsSignedIn(User))
@@ -57,34 +57,38 @@
                             var currentUser = await UserManager.GetUserAsync(User);
                             var email = currentUser?.Email ?? "";
 
-                            <!-- ADMIN MENU (email-based) -->
+                            <!-- ADMIN MENU -->
                             if (email == "hemasheta061@gmail.com")
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-danger fw-bold" href="/Admin/RoomType/Index">
-                                        Admin Dashboard
+                                    <span class="nav-link text-danger fw-bold">Admin</span>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-danger fw-bold" href="/Admin/RoomType">
+                                        Room Types
                                     </a>
                                 </li>
 
                                 <li class="nav-item">
-                                    <a class="nav-link text-danger fw-bold" href="/Admin/Room/Index">
-                                        Manage Rooms
+                                    <a class="nav-link text-danger fw-bold" href="/Admin/Room">
+                                        Rooms
                                     </a>
                                 </li>
 
                                 <li class="nav-item">
-                                    <a class="nav-link text-danger fw-bold" href="/Admin/Booking/Index">
-                                        Manage Bookings
+                                    <a class="nav-link text-danger fw-bold" href="/Admin/Booking">
+                                        Bookings
                                     </a>
                                 </li>
                             }
 
-                            <!-- USER GREETING -->
+                            <!-- GREETING -->
                             <li class="nav-item d-flex align-items-center me-3">
                                 <span class="nav-link text-dark">Hello, @email!</span>
                             </li>
 
-                            <!-- LOGOUT BUTTON -->
+                            <!-- LOGOUT -->
                             <li class="nav-item">
                                 <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline">
                                     <button type="submit" class="btn btn-danger btn-sm">Logout</button>
@@ -113,14 +117,12 @@
         </nav>
     </header>
 
-    <!-- PAGE BODY -->
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <!-- FOOTER -->
     <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2025 - Bookify -

@@ -21,7 +21,9 @@ namespace Depi_Project.Controllers.Customer
         public IActionResult Index()
         {
             var rooms = _roomService.GetAvailableRooms();
-            return View(rooms);
+
+            // ⭐ Explicit view path
+            return View("~/Views/Customer/Room/Index.cshtml", rooms);
         }
 
         // Matches: /Customer/Room/Details/5
@@ -31,7 +33,8 @@ namespace Depi_Project.Controllers.Customer
             var room = _roomService.GetRoomById(id);
             if (room == null) return NotFound();
 
-            return View(room);
+            // ⭐ Explicit view path
+            return View("~/Views/Customer/Room/Details.cshtml", room);
         }
     }
 }
