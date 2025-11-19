@@ -11,33 +11,61 @@
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <style>
-        /* Navbar is always dark */
+        /* BODY FLEX so footer stays at bottom */
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        /* NAVBAR */
         .navbar-custom {
             background-color: #111 !important;
         }
 
-            .navbar-custom .nav-link,
             .navbar-custom .navbar-brand {
                 color: #fff !important;
+                font-size: 30px !important; /* Bigger Bookify text */
+                font-weight: 900;
+                letter-spacing: 1px;
             }
 
-        /* MODERN FOOTER */
+            .navbar-custom .nav-link {
+                color: #fff !important;
+                font-size: 16px;
+            }
+
+        /* FOOTER */
         .footer-modern {
             background: #111;
             color: #ccc;
-            padding: 40px 0;
+            padding: 50px 0;
+            width: 100%;
         }
 
             .footer-modern h5 {
                 color: #fff;
                 margin-bottom: 15px;
+                font-size: 26px !important; /* Bigger Bookify */
+                font-weight: 900;
+                letter-spacing: 1px;
             }
 
             .footer-modern a {
                 color: #bbb;
                 text-decoration: none;
+                font-size: 16px;
             }
 
                 .footer-modern a:hover {
@@ -46,121 +74,146 @@
 
         .social-icons a {
             margin-right: 12px;
-            font-size: 22px;
+            font-size: 26px; /* Bigger icons */
             color: #bbb;
         }
 
             .social-icons a:hover {
                 color: #fff;
             }
+
+        /* LinkedIn text beside icon */
+        .linkedin-text {
+            font-size: 16px;
+            color: #ccc;
+            margin-left: 8px;
+        }
+
+            .linkedin-text:hover {
+                color: #fff;
+                text-decoration: underline;
+            }
     </style>
 </head>
 
 <body>
 
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-custom shadow-sm">
-            <div class="container-fluid">
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-sm navbar-custom shadow-sm">
+        <div class="container-fluid">
 
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">Bookify</a>
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">Bookify</a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarItems">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarItems">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <div class="collapse navbar-collapse" id="navbarItems">
+            <div class="collapse navbar-collapse" id="navbarItems">
 
-                    <!-- LEFT -->
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/Customer/Room">Rooms</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/Home/Contact">Contact</a></li>
-                    </ul>
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
 
-                    <!-- RIGHT -->
-                    <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Customer/Room">Rooms</a>
+                    </li>
+                </ul>
 
-                        @if (SignInManager.IsSignedIn(User))
+                <ul class="navbar-nav ms-auto">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        var user = await UserManager.GetUserAsync(User);
+                        var email = user?.Email ?? "";
+
+                        if (email == "hemasheta061@gmail.com")
                         {
-                            var u = await UserManager.GetUserAsync(User);
-                            var email = u?.Email ?? "";
-
-                            <!-- Admin -->
-                            if (email == "hemasheta061@gmail.com")
-                            {
-                                <li class="nav-item"><a class="nav-link text-warning fw-bold" href="/Admin/RoomType">Room Types</a></li>
-                                <li class="nav-item"><a class="nav-link text-warning fw-bold" href="/Admin/Room">Rooms</a></li>
-                                <li class="nav-item"><a class="nav-link text-warning fw-bold" href="/Admin/Booking">Bookings</a></li>
-                            }
-
-                            <li class="nav-item d-flex align-items-center me-2">
-                                <span class="text-white">Hello, @email</span>
-                            </li>
-
-                            <li class="nav-item">
-                                <form asp-area="Identity" asp-page="/Account/Logout" method="post">
-                                    <button class="btn btn-danger btn-sm">Logout</button>
-                                </form>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item me-2"><a class="btn btn-success btn-sm" asp-area="Identity" asp-page="/Account/Login">Login</a></li>
-                            <li class="nav-item"><a class="btn btn-primary btn-sm" asp-area="Identity" asp-page="/Account/Register">Register</a></li>
+                            <li class="nav-item"><a class="nav-link text-warning fw-bold" href="/Admin/RoomType">Room Types</a></li>
+                            <li class="nav-item"><a class="nav-link text-warning fw-bold" href="/Admin/Room">Rooms</a></li>
+                            <li class="nav-item"><a class="nav-link text-warning fw-bold" href="/Admin/Booking">Bookings</a></li>
                         }
 
-                    </ul>
+                        <li class="nav-item d-flex align-items-center me-3">
+                            <span class="text-white">Hello, @email</span>
+                        </li>
 
-                </div>
+                        <li class="nav-item">
+                            <form asp-area="Identity" asp-page="/Account/Logout" method="post">
+                                <button class="btn btn-danger btn-sm">Logout</button>
+                            </form>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item me-2">
+                            <a class="btn btn-success btn-sm" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary btn-sm" asp-area="Identity" asp-page="/Account/Register">Register</a>
+                        </li>
+                    }
+                </ul>
+
             </div>
-        </nav>
-    </header>
+        </div>
+    </nav>
 
 
-    <!-- MAIN PAGE CONTENT -->
-    <div class="container pt-3">
+    <!-- MAIN CONTENT -->
+    <main>
         @RenderBody()
-    </div>
+    </main>
 
-    <!-- MODERN FOOTER -->
-    <footer class="footer-modern mt-5">
+
+    <!-- FOOTER -->
+    <footer id="siteFooter" class="footer-modern">
         <div class="container">
             <div class="row">
 
-                <!-- About -->
+                <!-- Bookify Brand -->
                 <div class="col-md-4">
                     <h5>Bookify</h5>
-                    <p>Your trusted hotel booking partner.</p>
+                    <p>Your trusted hotel booking partner for a luxurious and comfortable stay.</p>
                 </div>
 
-                <!-- Quick Links -->
-                <div class="col-md-4">
-                    <h5>Quick Links</h5>
-                    <a href="/Customer/Room">Rooms</a><br />
-                    <a href="/Home/Contact">Contact</a><br />
-                    <a href="/Home/Privacy">Privacy Policy</a>
-                </div>
-
-                <!-- Contact & Social -->
+                <!-- Contact Section -->
                 <div class="col-md-4">
                     <h5>Contact</h5>
-                    <p>Email: support@bookify.com</p>
 
-                    <div class="social-icons">
-                        <a href="#"><i class="bi bi-facebook"></i></a>
-                        <a href="#"><i class="bi bi-instagram"></i></a>
-                        <a href="#"><i class="bi bi-twitter"></i></a>
+                    <p>Email: <strong>hemasheta061@gmail.com</strong></p>
+                    <p>Phone: <strong>+201128067848</strong></p>
+                    <p>Address: <strong>Mansoura, Egypt</strong></p>
+                </div>
+
+                <!-- Social Icons -->
+                <div class="col-md-4">
+                    <h5>Social</h5>
+
+                    <div class="social-icons mt-2 d-flex align-items-center">
+                        <a href="https://www.linkedin.com/in/ibrahim-sheta" target="_blank">
+                            <i class="bi bi-linkedin"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/in/ibrahim-sheta" target="_blank" class="linkedin-text">
+                            Ibrahim Sheta
+                        </a>
                     </div>
+
                 </div>
 
             </div>
 
-            <hr style="border-color:#333;">
+            <hr style="border-color:#333;" />
             <p class="text-center">© 2025 Bookify. All rights reserved.</p>
         </div>
     </footer>
 
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Smooth Scroll to Footer -->
+    <script>
+        function scrollToFooter() {
+            document.getElementById("siteFooter").scrollIntoView({ behavior: "smooth" });
+        }
+    </script>
 
     @RenderSection("Scripts", required: false)
 </body>
