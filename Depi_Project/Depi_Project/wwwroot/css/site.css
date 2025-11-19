@@ -20,3 +20,25 @@ html {
 body {
   margin-bottom: 60px;
 }
+    /* GLOBAL THEME COLORS */
+    body.dark-mode {
+        background-color: #121212 !important;
+        color: #ffffff !important;
+    }
+
+    body.light-mode {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+
+.navbar-dark .nav-link {
+    color: #ffffff !important;
+}
+
+.navbar-light .nav-link {
+    color: #000000 !important;
+}
+
+footer {
+    color: #cccccc !important;
+}
