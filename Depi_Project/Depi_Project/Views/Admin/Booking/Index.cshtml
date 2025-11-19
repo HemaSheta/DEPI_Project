@@ -4,37 +4,56 @@
     ViewData["Title"] = "Bookings";
 }
 
-<h2>Bookings</h2>
+<div class="container mt-4" style="max-width: 1200px;">
 
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Room</th>
-            <th>User Profile ID</th>
-            <th>Check In</th>
-            <th>Check Out</th>
-            <th>Total Price</th>
-            <th>Payment Status</th>
-            <th></th>
-        </tr>
-    </thead>
+    <h2 class="mb-4 text-center fw-bold" style="font-size: 2rem;">Bookings</h2>
 
-    <tbody>
-        @foreach (var b in Model)
-        {
-            <tr>
-                <td>@b.RoomId</td>
-                <td>@b.IdentityUserId</td>
-                <td>@b.CheckTime.ToString("yyyy-MM-dd")</td>
-                <td>@b.CheckOutTime.ToString("yyyy-MM-dd")</td>
-                <td>@b.TotalPrice</td>
-                <td>@b.PaymentStatus</td>
-                <td>
-                    <a href="/Admin/Booking/Delete/@b.BookingId" class="btn btn-danger btn-sm">
-                        Cancel
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <div class="card shadow-sm p-3">
+
+        <table class="table table-hover table-bordered mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Room</th>
+                    <th>User Profile ID</th>
+                    <th>Check In</th>
+                    <th>Check Out</th>
+                    <th>Total Price (EGP)</th>
+                    <th>Payment Status</th>
+                    <th style="width: 140px;">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var b in Model)
+                {
+                    <tr>
+                        <td>@b.RoomId</td>
+                        <td>@b.IdentityUserId</td>
+
+                        <td>@b.CheckTime.ToString("yyyy-MM-dd")</td>
+                        <td>@b.CheckOutTime.ToString("yyyy-MM-dd")</td>
+
+                        <td>@b.TotalPrice</td>
+
+                        <td>
+                            <span class="badge
+                                    @(b.PaymentStatus == "Paid" ? "bg-success" : "bg-warning text-dark")">
+                                @b.PaymentStatus
+                            </span>
+                        </td>
+
+                        <td>
+                            <a href="/Admin/Booking/Delete/@b.BookingId"
+                               class="btn btn-danger btn-sm">
+                                Cancel
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>

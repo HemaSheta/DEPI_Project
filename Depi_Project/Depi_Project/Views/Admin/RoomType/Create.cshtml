@@ -4,33 +4,45 @@
     ViewData["Title"] = "Create Room Type";
 }
 
-<h2>Create Room Type</h2>
+<div class="container mt-4" style="max-width: 700px;">
 
-<form asp-action="Create" method="post">
-    <div class="form-group">
-        <label>Room Type Name</label>
-        <input asp-for="RoomTypeName" class="form-control" />
-        <span asp-validation-for="RoomTypeName" class="text-danger"></span>
+    <h2 class="mb-4 text-center fw-bold" style="font-size: 2rem;">Create Room Type</h2>
+
+    <div class="card shadow-sm p-4">
+
+        <form asp-action="Create" method="post">
+
+            <div class="form-group mb-3">
+                <label class="fw-semibold">Room Type Name</label>
+                <input asp-for="RoomTypeName" class="form-control" />
+                <span asp-validation-for="RoomTypeName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="fw-semibold">Description</label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="fw-semibold">Price (EGP)</label>
+                <input asp-for="Price" class="form-control" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="fw-semibold">Number of People</label>
+                <input asp-for="NumOfPeople" class="form-control" />
+                <span asp-validation-for="NumOfPeople" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="/Admin/RoomType" class="btn btn-secondary px-4">Cancel</a>
+                <button class="btn btn-success px-4" type="submit">Create</button>
+            </div>
+
+        </form>
+
     </div>
 
-    <div class="form-group">
-        <label>Description</label>
-        <input asp-for="Description" class="form-control" />
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label>Price</label>
-        <input asp-for="Price" class="form-control" />
-        <span asp-validation-for="Price" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label>Number of People</label>
-        <input asp-for="NumOfPeople" class="form-control" />
-        <span asp-validation-for="NumOfPeople" class="text-danger"></span>
-    </div>
-
-    <button class="btn btn-success mt-3" type="submit">Create</button>
-    <a href="/Admin/RoomType" class="btn btn-secondary mt-3">Cancel</a>
-</form>
+</div>

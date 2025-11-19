@@ -53,10 +53,13 @@ namespace Depi_Project.Controllers.Admin
             return View("~/Views/Admin/RoomType/Edit.cshtml", type);
         }
 
-        [HttpPost("Edit")]
+        [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(RoomType roomType)
+        public IActionResult Edit(int id, RoomType roomType)
         {
+            if (id != roomType.RoomTypeId)
+                return BadRequest();
+
             if (ModelState.IsValid)
             {
                 _roomTypeService.UpdateRoomType(roomType);
@@ -76,7 +79,7 @@ namespace Depi_Project.Controllers.Admin
             return View("~/Views/Admin/RoomType/Delete.cshtml", type);
         }
 
-        [HttpPost("Delete")]
+        [HttpPost("Delete/{id}")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {

@@ -4,39 +4,68 @@
     ViewData["Title"] = "Rooms";
 }
 
-<h2>Rooms</h2>
+<div class="container mt-4" style="max-width: 1200px;">
 
-<a href="/Admin/Room/Create" class="btn btn-primary mb-3">Add New Room</a>
+    <h2 class="mb-4 text-center fw-bold" style="font-size: 2rem;">Rooms</h2>
 
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Room #</th>
-            <th>Description</th>
-            <th>Status</th>
-            <th>Room Type</th>
-            <th>Slide 1</th>
-            <th>Slide 2</th>
-            <th>Slide 3</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var room in Model)
-        {
-            <tr>
-                <td>@room.RoomNum</td>
-                <td>@room.Description</td>
-                <td>@room.Status</td>
-                <td>@room.RoomType?.RoomTypeName</td>
-                <td><img src="@room.Slide1" width="80" height="60" /></td>
-                <td><img src="@room.Slide2" width="80" height="60" /></td>
-                <td><img src="@room.Slide3" width="80" height="60" /></td>
-                <td>
-                    <a href="/Admin/Room/Edit/@room.RoomId" class="btn btn-warning btn-sm">Edit</a>
-                    <a href="/Admin/Room/Delete/@room.RoomId" class="btn btn-danger btn-sm">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <div class="d-flex justify-content-end mb-3">
+        <a class="btn btn-primary" href="/Admin/Room/Create">+ Add New Room</a>
+    </div>
+
+    <div class="card shadow-sm p-3">
+
+        <table class="table table-hover table-bordered mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Room #</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Room Type</th>
+                    <th class="text-center">Slide 1</th>
+                    <th class="text-center">Slide 2</th>
+                    <th class="text-center">Slide 3</th>
+                    <th style="width: 160px;">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var room in Model)
+                {
+                    <tr>
+                        <td>@room.RoomNum</td>
+                        <td>@room.Description</td>
+                        <td>
+                            <span class="badge
+                                    @(room.Status == "Available" ? "bg-success" :
+                                                                    room.Status == "Booked" ? "bg-warning text-dark" :
+                                                                    "bg-danger")">
+                            @room.Status
+                        </span>
+                    </td>
+                    <td>@room.RoomType?.RoomTypeName</td>
+
+                        <td class="text-center">
+                            <img src="@room.Slide1" width="80" height="60" class="rounded" />
+                        </td>
+                        <td class="text-center">
+                            <img src="@room.Slide2" width="80" height="60" class="rounded" />
+                        </td>
+                        <td class="text-center">
+                            <img src="@room.Slide3" width="80" height="60" class="rounded" />
+                        </td>
+
+                        <td>
+                            <a href="/Admin/Room/Edit/@room.RoomId"
+                               class="btn btn-warning btn-sm me-1">Edit</a>
+
+                            <a href="/Admin/Room/Delete/@room.RoomId"
+                               class="btn btn-danger btn-sm">Delete</a>
+                        </td>
+                    </tr>
+                                }
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
