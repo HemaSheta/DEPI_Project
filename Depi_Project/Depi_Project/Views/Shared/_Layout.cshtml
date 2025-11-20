@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <style>
-        /* BODY FLEX so footer stays at bottom */
         html, body {
             height: 100%;
             margin: 0;
@@ -36,7 +35,7 @@
 
             .navbar-custom .navbar-brand {
                 color: #fff !important;
-                font-size: 30px !important; /* Bigger Bookify text */
+                font-size: 30px !important;
                 font-weight: 900;
                 letter-spacing: 1px;
             }
@@ -57,7 +56,7 @@
             .footer-modern h5 {
                 color: #fff;
                 margin-bottom: 15px;
-                font-size: 26px !important; /* Bigger Bookify */
+                font-size: 26px !important;
                 font-weight: 900;
                 letter-spacing: 1px;
             }
@@ -74,7 +73,7 @@
 
         .social-icons a {
             margin-right: 12px;
-            font-size: 26px; /* Bigger icons */
+            font-size: 26px;
             color: #bbb;
         }
 
@@ -82,7 +81,6 @@
                 color: #fff;
             }
 
-        /* LinkedIn text beside icon */
         .linkedin-text {
             font-size: 16px;
             color: #ccc;
@@ -112,10 +110,7 @@
 
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Customer/Room">Rooms</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="/Customer/Room">Rooms</a></li>
                 </ul>
 
                 <ul class="navbar-nav ms-auto">
@@ -124,22 +119,75 @@
                         var user = await UserManager.GetUserAsync(User);
                         var email = user?.Email ?? "";
 
-                        if (email == "hemasheta061@gmail.com")
+                        @if (email == "hemasheta061@gmail.com")   // ADMIN CHECK
                         {
-                            <li class="nav-item"><a class="nav-link text-warning fw-bold" href="/Admin/RoomType">Room Types</a></li>
-                            <li class="nav-item"><a class="nav-link text-warning fw-bold" href="/Admin/Room">Rooms</a></li>
-                            <li class="nav-item"><a class="nav-link text-warning fw-bold" href="/Admin/Booking">Bookings</a></li>
+                            <!-- Admin Links -->
+                            <li class="nav-item">
+                                <a class="nav-link text-warning fw-bold" href="/Admin/RoomType">Room Types</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-warning fw-bold" href="/Admin/Room">Rooms</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-warning fw-bold" href="/Admin/Booking">Bookings</a>
+                            </li>
+
+                            <!-- Admin Dropdown -->
+                            <li class="nav-item dropdown me-3">
+                                <a class="nav-link dropdown-toggle text-white d-flex align-items-center"
+                                   href="#" id="adminDropdown" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+
+                                    <i class="bi bi-person-badge-fill me-1"></i>   <!-- Admin Icon -->
+                                    Admin, @email
+                                </a>
+
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+
+                                    <li>
+                                        <form asp-area="Identity" asp-page="/Account/Logout" method="post">
+                                            <button class="dropdown-item text-danger">
+                                                <i class="bi bi-box-arrow-right me-1"></i> Logout
+                                            </button>
+                                        </form>
+                                    </li>
+
+                                </ul>
+                            </li>
                         }
 
-                        <li class="nav-item d-flex align-items-center me-3">
-                            <span class="text-white">Hello, @email</span>
-                        </li>
+                        else
+                        {
+                            <!-- CUSTOMER CART ICON -->
+                            <li class="nav-item me-3">
+                                <a class="nav-link position-relative" href="/Customer/Cart">
+                                    <i class="bi bi-cart3" style="font-size:20px; color:white;"></i>
+                                    <span id="cartCountBadge"
+                                          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                          style="font-size:10px;">0</span>
+                                </a>
+                            </li>
 
-                        <li class="nav-item">
-                            <form asp-area="Identity" asp-page="/Account/Logout" method="post">
-                                <button class="btn btn-danger btn-sm">Logout</button>
-                            </form>
-                        </li>
+                            <!-- CUSTOMER PROFILE DROPDOWN -->
+                            <li class="nav-item dropdown me-3">
+                                <a class="nav-link dropdown-toggle text-white d-flex align-items-center"
+                                   href="#" id="profileDropdown" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle me-1"></i>
+                                    @email
+                                </a>
+
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                    <li><a class="dropdown-item" href="/Customer/Profile">My Profile</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <form asp-area="Identity" asp-page="/Account/Logout" method="post">
+                                            <button class="dropdown-item text-danger">Logout</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
                     }
                     else
                     {
@@ -156,34 +204,28 @@
         </div>
     </nav>
 
-
     <!-- MAIN CONTENT -->
     <main>
         @RenderBody()
     </main>
-
 
     <!-- FOOTER -->
     <footer id="siteFooter" class="footer-modern">
         <div class="container">
             <div class="row">
 
-                <!-- Bookify Brand -->
                 <div class="col-md-4">
                     <h5>Bookify</h5>
                     <p>Your trusted hotel booking partner for a luxurious and comfortable stay.</p>
                 </div>
 
-                <!-- Contact Section -->
                 <div class="col-md-4">
                     <h5>Contact</h5>
-
                     <p>Email: <strong>hemasheta061@gmail.com</strong></p>
                     <p>Phone: <strong>+201128067848</strong></p>
                     <p>Address: <strong>Mansoura, Egypt</strong></p>
                 </div>
 
-                <!-- Social Icons -->
                 <div class="col-md-4">
                     <h5>Social</h5>
 
@@ -205,15 +247,7 @@
         </div>
     </footer>
 
-
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Smooth Scroll to Footer -->
-    <script>
-        function scrollToFooter() {
-            document.getElementById("siteFooter").scrollIntoView({ behavior: "smooth" });
-        }
-    </script>
 
     @RenderSection("Scripts", required: false)
 </body>

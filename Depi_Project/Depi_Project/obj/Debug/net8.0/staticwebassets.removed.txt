@@ -1,10 +1,3 @@
-C:\Users\hemas\OneDrive\سطح المكتب\DEPI Grad_Project\Depi_Project\Depi_Project\wwwroot\images\hotel-bg1.jpg
-C:\Users\hemas\OneDrive\سطح المكتب\DEPI Grad_Project\Depi_Project\Depi_Project\wwwroot\images\rooms\11.jpeg
-C:\Users\hemas\OneDrive\سطح المكتب\DEPI Grad_Project\Depi_Project\Depi_Project\wwwroot\images\rooms\1679671386374.png
-C:\Users\hemas\OneDrive\سطح المكتب\DEPI Grad_Project\Depi_Project\Depi_Project\wwwroot\images\rooms\2.jpeg
-C:\Users\hemas\OneDrive\سطح المكتب\DEPI Grad_Project\Depi_Project\Depi_Project\wwwroot\images\rooms\3.jpeg
-C:\Users\hemas\OneDrive\سطح المكتب\DEPI Grad_Project\Depi_Project\Depi_Project\wwwroot\images\rooms\4.jpeg
-C:\Users\hemas\OneDrive\سطح المكتب\DEPI Grad_Project\Depi_Project\Depi_Project\wwwroot\images\rooms\47ecc544c1902043aabd5437d0523e1f.jpg
-C:\Users\hemas\OneDrive\سطح المكتب\DEPI Grad_Project\Depi_Project\Depi_Project\wwwroot\images\rooms\7.jpeg
-C:\Users\hemas\OneDrive\سطح المكتب\DEPI Grad_Project\Depi_Project\Depi_Project\wwwroot\images\rooms\8.jpeg
-C:\Users\hemas\OneDrive\سطح المكتب\DEPI Grad_Project\Depi_Project\Depi_Project\wwwroot\images\rooms\84248a0d3a7bca1441a35a85fd5b44ff.jpg
+C:\Users\hemas\OneDrive\سطح المكتب\DEPI Grad_Project\Depi_Project\Depi_Project\wwwroot\images\rooms\Room 1.jpg
+C:\Users\hemas\OneDrive\سطح المكتب\DEPI Grad_Project\Depi_Project\Depi_Project\wwwroot\images\rooms\Room 2.jpg
+C:\Users\hemas\OneDrive\سطح المكتب\DEPI Grad_Project\Depi_Project\Depi_Project\wwwroot\images\rooms\Room 3.jpg

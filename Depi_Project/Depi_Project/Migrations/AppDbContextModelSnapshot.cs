@@ -54,6 +54,9 @@ namespace Depi_Project.Migrations
                     b.Property<float>("TotalPrice")
                         .HasColumnType("real");
 
+                    b.Property<int?>("UserProfileId")
+                        .HasColumnType("int");
+
                     b.HasKey("BookingId");
 
                     b.HasIndex("IdentityUserId");
@@ -61,6 +64,8 @@ namespace Depi_Project.Migrations
                     b.HasIndex("IdentityUserId1");
 
                     b.HasIndex("RoomId");
+
+                    b.HasIndex("UserProfileId");
 
                     b.ToTable("Bookings");
                 });
@@ -130,6 +135,42 @@ namespace Depi_Project.Migrations
                     b.HasKey("RoomTypeId");
 
                     b.ToTable("RoomTypes");
+                });
+
+            modelBuilder.Entity("Depi_Project.Models.UserProfile", b =>
+                {
+                    b.Property<int>("UserProfileId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserProfileId"));
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("IdentityUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("UserProfileId");
+
+                    b.HasIndex("IdentityUserId");
+
+                    b.ToTable("UserProfiles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -354,6 +395,10 @@ namespace Depi_Project.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Depi_Project.Models.UserProfile", null)
+                        .WithMany("Bookings")
+                        .HasForeignKey("UserProfileId");
+
                     b.Navigation("IdentityUser");
 
                     b.Navigation("Room");
@@ -368,6 +413,17 @@ namespace Depi_Project.Migrations
                         .IsRequired();
 
                     b.Navigation("RoomType");
+                });
+
+            modelBuilder.Entity("Depi_Project.Models.UserProfile", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "IdentityUser")
+                        .WithMany()
+                        .HasForeignKey("IdentityUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("IdentityUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -429,6 +485,11 @@ namespace Depi_Project.Migrations
             modelBuilder.Entity("Depi_Project.Models.RoomType", b =>
                 {
                     b.Navigation("Rooms");
+                });
+
+            modelBuilder.Entity("Depi_Project.Models.UserProfile", b =>
+                {
+                    b.Navigation("Bookings");
                 });
 #pragma warning restore 612, 618
         }

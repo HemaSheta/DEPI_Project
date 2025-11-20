@@ -52,6 +52,7 @@ namespace Depi_Project
             builder.Services.AddScoped<IRoomService, RoomService>();
             builder.Services.AddScoped<IRoomTypeService, RoomTypeService>();
             builder.Services.AddScoped<IBookingService, BookingService>();
+            builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 
             builder.Services.AddRazorPages();
             builder.Services.AddControllersWithViews();
