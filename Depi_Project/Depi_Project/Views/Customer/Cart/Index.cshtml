@@ -1,0 +1,61 @@
+﻿@model List<Depi_Project.Models.Room>
+
+@{
+    ViewData["Title"] = "My Cart";
+}
+
+<div class="container mt-4" style="max-width:900px;">
+    <h2 class="fw-bold mb-3">Your Reservation Cart</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">Your cart is empty.</div>
+        <a href="/Customer/Room" class="btn btn-primary">Browse Rooms</a>
+    }
+    else
+    {
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Room</th>
+                    <th>Type</th>
+                    <th>Image</th>
+                    <th>Price/Night</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var r in Model)
+                {
+                    <tr>
+                        <td>Room @r.RoomNum</td>
+                        <td>@r.RoomType?.RoomTypeName</td>
+                        <td><img src="@r.Slide1" width="100" /></td>
+                        <td>@r.RoomType?.Price EGP</td>
+
+                        <td>
+                            <button class="btn btn-danger btn-sm remove-btn" data-id="@r.RoomId">
+                                Remove
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <a href="/Customer/Booking/Create" class="btn btn-success">Continue to Booking</a>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(".remove-btn").click(function () {
+            let id = $(this).data("id");
+
+            $.post(`/Customer/Cart/Remove/${id}`, function () {
+                location.reload();
+            });
+        });
+    </script>
+}

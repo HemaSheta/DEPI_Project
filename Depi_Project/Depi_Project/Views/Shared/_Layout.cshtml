@@ -138,12 +138,11 @@
                                    href="#" id="adminDropdown" role="button"
                                    data-bs-toggle="dropdown" aria-expanded="false">
 
-                                    <i class="bi bi-person-badge-fill me-1"></i>   <!-- Admin Icon -->
+                                    <i class="bi bi-person-badge-fill me-1"></i>
                                     Admin, @email
                                 </a>
 
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-
                                     <li>
                                         <form asp-area="Identity" asp-page="/Account/Logout" method="post">
                                             <button class="dropdown-item text-danger">
@@ -151,11 +150,9 @@
                                             </button>
                                         </form>
                                     </li>
-
                                 </ul>
                             </li>
                         }
-
                         else
                         {
                             <!-- CUSTOMER CART ICON -->
@@ -228,7 +225,6 @@
 
                 <div class="col-md-4">
                     <h5>Social</h5>
-
                     <div class="social-icons mt-2 d-flex align-items-center">
                         <a href="https://www.linkedin.com/in/ibrahim-sheta" target="_blank">
                             <i class="bi bi-linkedin"></i>
@@ -237,7 +233,6 @@
                             Ibrahim Sheta
                         </a>
                     </div>
-
                 </div>
 
             </div>
@@ -248,6 +243,23 @@
     </footer>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- 🔥 AUTO CART BADGE REFRESH -->
+    <script>
+        (function () {
+            const badge = document.getElementById("cartCountBadge");
+            if (!badge) return;
+
+            fetch('/Customer/Cart/Count')
+                .then(r => r.json())
+                .then(j => {
+                    if (j.count !== undefined) {
+                        badge.innerText = j.count;
+                    }
+                })
+                .catch(_ => {});
+        })();
+    </script>
 
     @RenderSection("Scripts", required: false)
 </body>
