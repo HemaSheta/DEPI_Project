@@ -28,7 +28,6 @@ namespace Depi_Project.Controllers.Customer
         }
 
         // GET: /Customer/Cart/Count
-        // returns { count: n }
         [HttpGet("Count")]
         public IActionResult Count()
         {
@@ -94,6 +93,15 @@ namespace Depi_Project.Controllers.Customer
                 return Redirect("/Customer/Cart");
             }
 
+            // NEW: Prevent overlapping cart items across different rooms (customer rule)
+            bool overlapsWithCart = cart.Any(c =>
+                ci < c.CheckOut && co > c.CheckIn); // overlap test
+            if (overlapsWithCart)
+            {
+                TempData["Error"] = "You already have a reservation in your cart that overlaps these dates. You cannot book multiple rooms for overlapping dates.";
+                return Redirect(Request.Headers["Referer"].ToString() ?? "/Customer/Room");
+            }
+
             var item = new CartItem
             {
                 RoomId = room.RoomId,
@@ -110,17 +118,24 @@ namespace Depi_Project.Controllers.Customer
             HttpContext.Session.SetObject(SESSION_CART_KEY, cart);
 
             // Redirect behavior:
-            // stay==true means "Add to Cart and go back to Rooms" per user's previous requests
             if (stay)
             {
                 TempData["Success"] = "Added to cart.";
                 return Redirect("/Customer/Room");
             }
 
-            // Default: Book Now -> redirect to cart
             TempData["Success"] = "Added to cart.";
             return Redirect("/Customer/Cart");
         }
+
+
+        [HttpGet("Success")]
+        public IActionResult Success()
+        {
+            HttpContext.Session.Remove("reservation_cart_v1");  // clear cart
+            return View("~/Views/Customer/Cart/Success.cshtml");
+        }
+
 
         // POST: /Customer/Cart/Remove
         [HttpPost("Remove")]

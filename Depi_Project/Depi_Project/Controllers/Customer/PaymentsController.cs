@@ -16,13 +16,16 @@ namespace Depi_Project.Controllers.Customer
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly StripeSettings _stripeSettings;
+        private readonly IBookingService _bookingService;
 
         public PaymentsController(
             UserManager<IdentityUser> userManager,
-            IOptions<StripeSettings> stripeOptions)
+            IOptions<StripeSettings> stripeOptions,
+            IBookingService bookingService)
         {
             _userManager = userManager;
             _stripeSettings = stripeOptions.Value;
+            _bookingService = bookingService;
         }
 
         // ===========================
@@ -34,52 +37,101 @@ namespace Depi_Project.Controllers.Customer
             var cart = HttpContext.Session.GetObject<List<CartItem>>("reservation_cart_v1")
                        ?? new List<CartItem>();
 
-            if (!cart.Any()) return Redirect("/Customer/Cart");
+            if (!cart.Any())
+            {
+                TempData["Error"] = "Your cart is empty.";
+                return Redirect("/Customer/Cart");
+            }
 
+            // 1) Validate cart items: no overlapping between items (customer rule)
+            for (int i = 0; i < cart.Count; i++)
+            {
+                for (int j = i + 1; j < cart.Count; j++)
+                {
+                    var a = cart[i];
+                    var b = cart[j];
+
+                    bool overlap = a.CheckIn < b.CheckOut && a.CheckOut > b.CheckIn;
+                    if (overlap)
+                    {
+                        TempData["Error"] = "Cart contains two items that overlap in dates. You cannot book multiple rooms for overlapping dates.";
+                        return Redirect("/Customer/Cart");
+                    }
+                }
+            }
+
+            // 2) Validate availability for each cart item against existing bookings
+            foreach (var c in cart)
+            {
+                if (!_bookingService.IsRoomAvailable(c.RoomId, c.CheckIn, c.CheckOut))
+                {
+                    TempData["Error"] = $"Room #{c.RoomNum} is no longer available for the selected dates.";
+                    return Redirect("/Customer/Cart");
+                }
+            }
+
+            // 3) Validate that the user doesn't have existing bookings overlapping any cart item
+            var identityId = _userManager.GetUserId(User);
+            if (!string.IsNullOrEmpty(identityId))
+            {
+                foreach (var c in cart)
+                {
+                    var userBookings = _bookingService.GetAllBookings()
+                        .Where(b => b.IdentityUserId == identityId);
+
+                    foreach (var ub in userBookings)
+                    {
+                        bool overlap = c.CheckIn < ub.CheckOutTime && c.CheckOut > ub.CheckTime;
+                        if (overlap)
+                        {
+                            TempData["Error"] = "You already have a booking that overlaps one of the cart items. Please remove the conflicting item.";
+                            return Redirect("/Customer/Cart");
+                        }
+                    }
+                }
+            }
+
+            // Passed validation -> create Stripe Session
             StripeConfiguration.ApiKey = _stripeSettings.SecretKey;
             var domain = $"{Request.Scheme}://{Request.Host}";
 
-            // Metadata sent to Stripe
+            // Metadata (compact)
             var metadata = new Dictionary<string, string>
             {
                 { "CartCount", cart.Count.ToString() },
-                { "UserId", _userManager.GetUserId(User) ?? "" }
+                { "IdentityUserId", identityId ?? "" }
             };
 
-            // Compact metadata (RoomId|CheckIn|CheckOut|Price)
             for (int i = 0; i < cart.Count; i++)
             {
                 var c = cart[i];
-                metadata[$"item_{i}"] =
-                    $"{c.RoomId}|{c.CheckIn:yyyy-MM-dd}|{c.CheckOut:yyyy-MM-dd}|{c.PricePerNight}";
+                metadata[$"item_{i}"] = $"{c.RoomId}|{c.CheckIn:yyyy-MM-dd}|{c.CheckOut:yyyy-MM-dd}|{c.PricePerNight}";
             }
+
+            var lineItems = cart.Select(c =>
+            {
+                int nights = (c.CheckOut.Date - c.CheckIn.Date).Days;
+                if (nights <= 0) nights = 1;
+                return new SessionLineItemOptions
+                {
+                    Quantity = 1,
+                    PriceData = new SessionLineItemPriceDataOptions
+                    {
+                        Currency = "usd",
+                        UnitAmount = (long)(c.PricePerNight * nights * 100),
+                        ProductData = new SessionLineItemPriceDataProductDataOptions
+                        {
+                            Name = $"Room {c.RoomNum} - {c.RoomTitle}",
+                            Description = $"{nights} nights ({c.CheckIn:yyyy-MM-dd} to {c.CheckOut:yyyy-MM-dd})"
+                        }
+                    }
+                };
+            }).ToList();
 
             var options = new SessionCreateOptions
             {
                 PaymentMethodTypes = new List<string> { "card" },
-
-                LineItems = cart.Select(c =>
-                {
-                    int nights = (c.CheckOut.Date - c.CheckIn.Date).Days;
-                    if (nights <= 0) nights = 1;
-
-                    return new SessionLineItemOptions
-                    {
-                        Quantity = 1,
-                        PriceData = new SessionLineItemPriceDataOptions
-                        {
-                            Currency = "usd",
-                            UnitAmount = (long)(c.PricePerNight * nights * 100),
-
-                            ProductData = new SessionLineItemPriceDataProductDataOptions
-                            {
-                                Name = $"Room {c.RoomNum} - {c.RoomTitle}", // FIX HERE
-                                Description = $"{nights} nights ({c.CheckIn:yyyy-MM-dd} to {c.CheckOut:yyyy-MM-dd})"
-                            }
-                        }
-                    };
-                }).ToList(),
-
+                LineItems = lineItems,
                 Mode = "payment",
                 SuccessUrl = domain + "/Customer/Cart/Success",
                 CancelUrl = domain + "/Customer/Cart",
@@ -89,6 +141,7 @@ namespace Depi_Project.Controllers.Customer
             var service = new SessionService();
             var session = service.Create(options);
 
+            // Return session id and url (front-end can redirect)
             return Json(new { id = session.Id, url = session.Url });
         }
 
@@ -154,7 +207,6 @@ namespace Depi_Project.Controllers.Customer
             return Json(new { id = session.Id });
         }
     }
-
 
     // Helper class to read POST JSON
     public class CheckoutRequest

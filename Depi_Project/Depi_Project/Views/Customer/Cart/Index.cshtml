@@ -137,10 +137,9 @@
 
                     <br />
 
-                    <a href="/Customer/Payments/CreateCheckoutFromCart"
-                       class="btn btn-success checkout-btn mt-2">
+                    <button id="checkoutBtn" class="btn btn-success checkout-btn mt-2">
                         Proceed to Checkout
-                    </a>
+                    </button>
                 </div>
             </div>
 
@@ -155,10 +154,44 @@
 
     <script>
         $(function () {
+
+            // Toastr messages
             var s = '@TempData["Success"]';
             var e = '@TempData["Error"]';
             if (s) toastr.success(s);
             if (e) toastr.error(e);
+
+            // ✔ AJAX Checkout Button
+            $("#checkoutBtn").on("click", function () {
+
+                let btn = $(this);
+                btn.prop("disabled", true).text("Processing...");
+
+                $.ajax({
+                    url: "/Customer/Payments/CheckoutFromCart",
+                    method: "GET",
+                    success: function (res) {
+                        if (res && res.url) {
+                            window.location.href = res.url; // Redirect to Stripe
+                        } else {
+                            toastr.error("Unexpected server response.");
+                            btn.prop("disabled", false).text("Proceed to Checkout");
+                        }
+                    },
+                    error: function (xhr) {
+
+                        let msg = "Something went wrong.";
+
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            msg = xhr.responseJSON.error;
+                        }
+
+                        toastr.error(msg);
+                        btn.prop("disabled", false).text("Proceed to Checkout");
+                    }
+                });
+            });
+
         });
     </script>
 }

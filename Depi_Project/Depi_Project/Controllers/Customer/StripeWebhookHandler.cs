@@ -10,6 +10,8 @@ using Stripe.Checkout;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace Depi_Project.Controllers.Customer
 {
@@ -19,14 +21,12 @@ namespace Depi_Project.Controllers.Customer
         {
             var json = await new StreamReader(context.Request.Body).ReadToEndAsync();
 
-            // Load Stripe settings (from appsettings.json)
             var stripeSettings = context.RequestServices.GetRequiredService<IOptions<StripeSettings>>();
             var webhookSecret = stripeSettings.Value.WebhookSecret;
 
             Event stripeEvent;
             try
             {
-                // Verify Stripe signature
                 stripeEvent = EventUtility.ConstructEvent(
                     json,
                     context.Request.Headers["Stripe-Signature"],
@@ -40,115 +40,151 @@ namespace Depi_Project.Controllers.Customer
                 return;
             }
 
-            // When payment is successful
             if (stripeEvent.Type == "checkout.session.completed")
             {
                 var session = stripeEvent.Data.Object as Session;
 
-                // Resolve services
                 var bookingService = context.RequestServices.GetRequiredService<IBookingService>();
                 var unitOfWork = context.RequestServices.GetRequiredService<IUnitOfWork>();
                 var userManager = context.RequestServices.GetService<UserManager<IdentityUser>>();
 
-                // 1) Get roomId and price and dates from metadata
-                if (!session.Metadata.TryGetValue("RoomId", out var roomIdStr)
-                    || !session.Metadata.TryGetValue("CheckIn", out var checkInStr)
-                    || !session.Metadata.TryGetValue("CheckOut", out var checkOutStr)
-                    || !session.Metadata.TryGetValue("TotalPrice", out var totalPriceStr))
-                {
-                    context.Response.StatusCode = 400;
-                    await context.Response.WriteAsync("Missing required metadata (RoomId / CheckIn / CheckOut / TotalPrice).");
-                    return;
-                }
-
-                if (!int.TryParse(roomIdStr, out var roomId))
-                {
-                    context.Response.StatusCode = 400;
-                    await context.Response.WriteAsync("Invalid RoomId metadata.");
-                    return;
-                }
-
-                if (!float.TryParse(totalPriceStr, out var totalPrice))
-                {
-                    context.Response.StatusCode = 400;
-                    await context.Response.WriteAsync("Invalid TotalPrice metadata.");
-                    return;
-                }
-
-                // 2) Determine IdentityUserId
+                // Read identity user id if provided
                 string identityUserId = null;
-
-                // Preferred: metadata contains IdentityUserId
-                if (session.Metadata.TryGetValue("IdentityUserId", out var identityIdFromMeta) && !string.IsNullOrWhiteSpace(identityIdFromMeta))
-                {
-                    identityUserId = identityIdFromMeta;
-                }
+                if (session.Metadata.TryGetValue("IdentityUserId", out var idFromMeta) && !string.IsNullOrWhiteSpace(idFromMeta))
+                    identityUserId = idFromMeta;
                 else
                 {
-                    // Fallback: try to find user by email from Stripe session (if available)
                     var email = session.CustomerDetails?.Email;
                     if (!string.IsNullOrWhiteSpace(email) && userManager != null)
                     {
                         var user = await userManager.FindByEmailAsync(email);
-                        if (user != null)
-                        {
-                            identityUserId = user.Id;
-                        }
+                        if (user != null) identityUserId = user.Id;
                     }
                 }
 
                 if (string.IsNullOrWhiteSpace(identityUserId))
                 {
                     context.Response.StatusCode = 400;
-                    await context.Response.WriteAsync("Could not determine Identity user for this payment. Include IdentityUserId in metadata or ensure session.customer_email is present.");
+                    await context.Response.WriteAsync("Could not determine IdentityUserId for this payment.");
                     return;
                 }
 
-                // 3) Build booking model
-                DateTime checkIn, checkOut;
-                try
+                // Collect item_i metadata entries
+                var items = new List<(int RoomId, DateTime CheckIn, DateTime CheckOut, float PricePerNight)>();
+                foreach (var kv in session.Metadata)
                 {
-                    checkIn = DateTime.Parse(checkInStr);
-                    checkOut = DateTime.Parse(checkOutStr);
+                    if (kv.Key.StartsWith("item_"))
+                    {
+                        // format: RoomId|yyyy-MM-dd|yyyy-MM-dd|price
+                        var parts = kv.Value.Split('|');
+                        if (parts.Length != 4) continue;
+
+                        if (!int.TryParse(parts[0], out var rid)) continue;
+                        if (!DateTime.TryParseExact(parts[1], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var ci)) continue;
+                        if (!DateTime.TryParseExact(parts[2], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var co)) continue;
+                        if (!float.TryParse(parts[3], out var p)) continue;
+
+                        items.Add((rid, ci, co, p));
+                    }
                 }
-                catch (Exception)
+
+                if (!items.Any())
                 {
                     context.Response.StatusCode = 400;
-                    await context.Response.WriteAsync("Invalid check-in/out dates in metadata.");
+                    await context.Response.WriteAsync("No cart items found in metadata.");
                     return;
                 }
 
-                var booking = new Booking
-                {
-                    RoomId = roomId,
-                    IdentityUserId = identityUserId,
-                    CheckTime = checkIn,
-                    CheckOutTime = checkOut,
-                    TotalPrice = totalPrice,
-                    PaymentStatus = "Paid"
-                };
-
-                // 4) Create booking via service (business rules applied there)
+                // Now run validations and create bookings in a single transaction
+                using var tx = unitOfWork.BeginTransaction();
                 try
                 {
-                    var created = bookingService.CreateBooking(booking);
-                    if (!created)
+                    // 1) Validate there are no overlaps among items themselves
+                    for (int i = 0; i < items.Count; i++)
                     {
-                        // Booking not created (room unavailable or user overlap)
-                        context.Response.StatusCode = 200;
-                        await context.Response.WriteAsync("Payment received but booking was not created (availability check failed).");
-                        return;
+                        for (int j = i + 1; j < items.Count; j++)
+                        {
+                            var a = items[i];
+                            var b = items[j];
+                            bool overlap = a.CheckIn < b.CheckOut && a.CheckOut > b.CheckIn;
+                            if (overlap)
+                            {
+                                // don't create any booking
+                                tx.Rollback();
+                                context.Response.StatusCode = 200;
+                                await context.Response.WriteAsync("Payment received but cart had overlapping items; bookings were not created.");
+                                return;
+                            }
+                        }
                     }
 
+                    // 2) Validate each item against existing bookings in DB
+                    foreach (var it in items)
+                    {
+                        if (!bookingService.IsRoomAvailable(it.RoomId, it.CheckIn, it.CheckOut))
+                        {
+                            tx.Rollback();
+                            context.Response.StatusCode = 200;
+                            await context.Response.WriteAsync($"Payment received but Room {it.RoomId} is no longer available for the dates.");
+                            return;
+                        }
+                    }
+
+                    // 3) Validate user existing bookings do not overlap any item
+                    var userBookings = bookingService.GetAllBookings()
+                                        .Where(b => b.IdentityUserId == identityUserId)
+                                        .ToList();
+                    foreach (var it in items)
+                    {
+                        foreach (var ub in userBookings)
+                        {
+                            bool overlap = it.CheckIn < ub.CheckOutTime && it.CheckOut > ub.CheckTime;
+                            if (overlap)
+                            {
+                                tx.Rollback();
+                                context.Response.StatusCode = 200;
+                                await context.Response.WriteAsync("Payment received but you already have bookings that overlap cart dates; bookings were not created.");
+                                return;
+                            }
+                        }
+                    }
+
+                    // 4) All validations passed — create bookings
+                    var createdBookingIds = new List<int>();
+                    foreach (var it in items)
+                    {
+                        var booking = new Booking
+                        {
+                            RoomId = it.RoomId,
+                            IdentityUserId = identityUserId,
+                            CheckTime = it.CheckIn,
+                            CheckOutTime = it.CheckOut,
+                            TotalPrice = (it.PricePerNight * Math.Max(1, (it.CheckOut.Date - it.CheckIn.Date).Days)),
+                            PaymentStatus = "Paid"
+                        };
+
+                        // Add booking using unit of work's repo directly (we're inside transaction)
+                        unitOfWork.Bookings.Add(booking);
+                        unitOfWork.Save(); // save to generate id if needed
+                        createdBookingIds.Add(booking.BookingId);
+
+                        // Do NOT set Room.Status globally — we keep date-based logic only.
+                        // If you still want to flag current-day bookings, you'd set Status if today is within range.
+                    }
+
+                    tx.Commit();
+
+                    // Optionally clear user's cart server-side: we don't have session here,
+                    // webhook can't access the user's session reliably. The frontend should clear session after redirect.
                     context.Response.StatusCode = 200;
-                    await context.Response.WriteAsync("Booking recorded");
+                    await context.Response.WriteAsync("Bookings recorded successfully");
                     return;
                 }
                 catch (Exception ex)
                 {
-                    // In production you would log this
+                    try { tx.Rollback(); } catch { }
                     context.Response.StatusCode = 500;
-                    await context.Response.WriteAsync($"Server error creating booking: {ex.Message}");
+                    await context.Response.WriteAsync("Server error creating bookings: " + ex.Message);
                     return;
                 }
             }

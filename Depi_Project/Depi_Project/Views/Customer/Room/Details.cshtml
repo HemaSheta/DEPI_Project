@@ -52,6 +52,7 @@
     <div class="col-md-7 mb-4">
         <div id="carouselRoom" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
+
                 @if (!string.IsNullOrWhiteSpace(Model.Slide1))
                 {
                     <div class="carousel-item active">
@@ -72,6 +73,7 @@
                         <img src="@Model.Slide3" class="carousel-img" />
                     </div>
                 }
+
             </div>
 
             <button class="carousel-control-prev" type="button" data-bs-target="#carouselRoom" data-bs-slide="prev">
@@ -85,6 +87,7 @@
 
     <div class="col-md-5">
         <div class="info-box">
+
             <h4>Description</h4>
             <p>@Model.Description</p>
 
@@ -121,42 +124,74 @@
                 }
                 else
                 {
-                    <a href="/Identity/Account/Login" class="btn btn-primary btn-main">Login to Book</a>
+                    <a href="/Identity/Account/Login" class="btn btn-primary btn-main">
+                        Login to Book
+                    </a>
                 }
 
                 <a href="/Customer/Room" class="btn btn-back">Back to Rooms</a>
             </div>
+
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        (function () {
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const today = new Date().toISOString().split("T")[0];
+
+            const ci = document.getElementById("checkIn");
+            const co = document.getElementById("checkOut");
+
+            ci.min = today;
+            co.min = today;
+
+            function enforceDates() {
+                if (!ci.value) return;
+
+                let inDate = new Date(ci.value);
+                let outDate = new Date(co.value);
+
+                let minOut = new Date(inDate);
+                minOut.setDate(minOut.getDate() + 1);
+                let minOutStr = minOut.toISOString().split("T")[0];
+
+                co.min = minOutStr;
+
+                if (!co.value || outDate <= inDate) {
+                    co.value = minOutStr;
+                }
+            }
+
+            ci?.addEventListener("change", enforceDates);
+            co?.addEventListener("change", enforceDates);
+
             const roomId = @Model.RoomId;
             const bookBtn = document.getElementById('bookNowBtn');
             const addBtn = document.getElementById('addCartBtn');
-            const inInput = document.getElementById('checkIn');
-            const outInput = document.getElementById('checkOut');
 
             function validDates() {
-                if (!inInput.value || !outInput.value) return false;
-                return new Date(outInput.value) > new Date(inInput.value);
+                return ci.value && co.value && new Date(co.value) > new Date(ci.value);
             }
 
             bookBtn?.addEventListener('click', function (e) {
                 e.preventDefault();
                 if (!validDates()) return alert("Please select valid dates.");
+
                 window.location.href =
-                    `/Customer/Cart/Add/${roomId}?checkIn=${inInput.value}&checkOut=${outInput.value}`;
+                    `/Customer/Cart/Add/${roomId}?checkIn=${ci.value}&checkOut=${co.value}`;
             });
 
             addBtn?.addEventListener('click', function (e) {
                 e.preventDefault();
                 if (!validDates()) return alert("Please select valid dates.");
+
                 window.location.href =
-                    `/Customer/Cart/Add/${roomId}?checkIn=${inInput.value}&checkOut=${outInput.value}&stay=true`;
+                    `/Customer/Cart/Add/${roomId}?checkIn=${ci.value}&checkOut=${co.value}&stay=true`;
             });
-        })();
+
+        });
     </script>
 }

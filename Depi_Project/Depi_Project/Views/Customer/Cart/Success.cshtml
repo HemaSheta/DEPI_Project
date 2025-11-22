@@ -1,0 +1,81 @@
+﻿@{
+    ViewData["Title"] = "Booking Success";
+}
+
+<style>
+    .success-container {
+        max-width: 800px;
+        margin: 40px auto;
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        text-align: center;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .success-icon {
+        font-size: 80px;
+        color: #28a745;
+        margin-bottom: 20px;
+    }
+
+    .success-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #222;
+        margin-bottom: 10px;
+    }
+
+    .success-text {
+        font-size: 1.1rem;
+        color: #555;
+        margin-bottom: 25px;
+    }
+
+    .btn-view {
+        padding: 14px 22px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        border-radius: 10px;
+    }
+
+    @@keyframes fadeIn {
+        0%
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+</style>
+
+<div class="success-container">
+
+    <div class="success-icon">
+        <i class="bi bi-check-circle-fill"></i>
+    </div>
+
+    <h1 class="success-title">Payment Successful!</h1>
+
+    <p class="success-text">
+        Your reservation has been confirmed.<br />
+        A confirmation has been sent to your email.
+    </p>
+
+    <a href="/Customer/Profile" class="btn btn-success btn-view">
+        View My Bookings
+    </a>
+
+    <br /><br />
+
+    <a href="/Customer/Room" class="btn btn-outline-secondary btn-view">
+        Continue Browsing Rooms
+    </a>
+</div>
