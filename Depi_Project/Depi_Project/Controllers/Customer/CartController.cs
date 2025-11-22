@@ -1,92 +1,154 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Depi_Project.Models;
 using Depi_Project.Services.Interfaces;
-using Depi_Project.Models;
+using Depi_Project.Helpers;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Depi_Project.Controllers.Customer
 {
-    [Route("Customer/Cart")]
+    [Route("Customer/[controller]")]
     public class CartController : Controller
     {
+        private const string SESSION_CART_KEY = "reservation_cart_v1";
         private readonly IRoomService _roomService;
+        private readonly IBookingService _bookingService;
 
-        public CartController(IRoomService roomService)
+        public CartController(IRoomService roomService, IBookingService bookingService)
         {
             _roomService = roomService;
+            _bookingService = bookingService;
         }
 
-        // ---------------------
-        // GET /Customer/Cart
-        // ---------------------
+        // GET: /Customer/Cart
         [HttpGet("")]
         public IActionResult Index()
         {
-            var cart = GetCart();
+            var cart = HttpContext.Session.GetObject<List<CartItem>>(SESSION_CART_KEY) ?? new List<CartItem>();
+            ViewBag.Total = cart.Sum(i => i.TotalPrice);
             return View("~/Views/Customer/Cart/Index.cshtml", cart);
         }
 
-        // ---------------------
-        // POST /Customer/Cart/Add/5
-        // ---------------------
-        [HttpPost("Add/{roomId}")]
-        public IActionResult Add(int roomId)
-        {
-            var room = _roomService.GetRoomById(roomId);
-            if (room == null)
-                return NotFound();
-
-            var cart = GetCart();
-
-            if (!cart.Any(c => c.RoomId == roomId))
-                cart.Add(room);
-
-            SaveCart(cart);
-
-            return Json(new { success = true, message = "Added to cart!" });
-        }
-
-        // ---------------------
-        // POST /Customer/Cart/Remove/5
-        // ---------------------
-        [HttpPost("Remove/{roomId}")]
-        public IActionResult Remove(int roomId)
-        {
-            var cart = GetCart();
-            var item = cart.FirstOrDefault(c => c.RoomId == roomId);
-
-            if (item != null)
-                cart.Remove(item);
-
-            SaveCart(cart);
-
-            return Json(new { success = true });
-        }
-
-        // ---------------------
-        // GET /Customer/Cart/Count
-        // ---------------------
+        // GET: /Customer/Cart/Count
+        // returns { count: n }
         [HttpGet("Count")]
         public IActionResult Count()
         {
-            var cart = GetCart();
+            var cart = HttpContext.Session.GetObject<List<CartItem>>(SESSION_CART_KEY) ?? new List<CartItem>();
             return Json(new { count = cart.Count });
         }
 
-
-        // =============================
-        // SESSION HELPERS
-        // =============================
-        private List<Room> GetCart()
+        // GET: /Customer/Cart/Add/{id}?checkIn=yyyy-MM-dd&checkOut=yyyy-MM-dd&stay=true
+        [HttpGet("Add/{id}")]
+        public IActionResult Add(int id, string? checkIn, string? checkOut, bool stay = false)
         {
-            var json = HttpContext.Session.GetString("CART");
-            if (json == null) return new List<Room>();
+            // Require dates
+            if (string.IsNullOrEmpty(checkIn) || string.IsNullOrEmpty(checkOut))
+            {
+                TempData["Error"] = "Please provide check-in and check-out dates.";
+                return Redirect(Request.Headers["Referer"].ToString() ?? "/Customer/Room");
+            }
 
-            return System.Text.Json.JsonSerializer.Deserialize<List<Room>>(json);
+            if (!DateTime.TryParse(checkIn, out var ci) || !DateTime.TryParse(checkOut, out var co))
+            {
+                TempData["Error"] = "Invalid dates format.";
+                return Redirect(Request.Headers["Referer"].ToString() ?? "/Customer/Room");
+            }
+
+            if (co <= ci)
+            {
+                TempData["Error"] = "Check-out must be after check-in.";
+                return Redirect(Request.Headers["Referer"].ToString() ?? "/Customer/Room");
+            }
+
+            var room = _roomService.GetRoomById(id);
+            if (room == null)
+            {
+                return NotFound();
+            }
+
+            // Check availability using booking service
+            if (!_bookingService.IsRoomAvailable(room.RoomId, ci, co))
+            {
+                TempData["Error"] = "Room is not available for the selected dates.";
+                return Redirect(Request.Headers["Referer"].ToString() ?? "/Customer/Room");
+            }
+
+            // Compute nights
+            var nights = (co.Date - ci.Date).Days;
+            if (nights <= 0) nights = 1;
+
+            var pricePerNight = room.RoomType?.Price ?? 0f;
+            var total = pricePerNight * nights;
+
+            var cart = HttpContext.Session.GetObject<List<CartItem>>(SESSION_CART_KEY) ?? new List<CartItem>();
+
+            // Prevent duplicate same room for same dates
+            bool duplicate = cart.Any(c =>
+                c.RoomId == room.RoomId
+                && c.CheckIn.Date == ci.Date
+                && c.CheckOut.Date == co.Date);
+
+            if (duplicate)
+            {
+                TempData["Error"] = "This room/date is already in your cart.";
+                if (stay) return Redirect("/Customer/Room");
+                return Redirect("/Customer/Cart");
+            }
+
+            var item = new CartItem
+            {
+                RoomId = room.RoomId,
+                RoomNum = room.RoomNum,
+                RoomTitle = room.RoomType?.RoomTypeName ?? $"Room {room.RoomNum}",
+                Slide = string.IsNullOrEmpty(room.Slide1) ? "" : room.Slide1,
+                CheckIn = ci,
+                CheckOut = co,
+                PricePerNight = pricePerNight,
+                TotalPrice = total
+            };
+
+            cart.Add(item);
+            HttpContext.Session.SetObject(SESSION_CART_KEY, cart);
+
+            // Redirect behavior:
+            // stay==true means "Add to Cart and go back to Rooms" per user's previous requests
+            if (stay)
+            {
+                TempData["Success"] = "Added to cart.";
+                return Redirect("/Customer/Room");
+            }
+
+            // Default: Book Now -> redirect to cart
+            TempData["Success"] = "Added to cart.";
+            return Redirect("/Customer/Cart");
         }
 
-        private void SaveCart(List<Room> cart)
+        // POST: /Customer/Cart/Remove
+        [HttpPost("Remove")]
+        [ValidateAntiForgeryToken]
+        public IActionResult Remove(int roomId, string checkIn, string checkOut)
         {
-            var json = System.Text.Json.JsonSerializer.Serialize(cart);
-            HttpContext.Session.SetString("CART", json);
+            if (!DateTime.TryParse(checkIn, out var ci) || !DateTime.TryParse(checkOut, out var co))
+                return Redirect("/Customer/Cart");
+
+            var cart = HttpContext.Session.GetObject<List<CartItem>>(SESSION_CART_KEY) ?? new List<CartItem>();
+            var removed = cart.RemoveAll(c =>
+                c.RoomId == roomId &&
+                c.CheckIn.Date == ci.Date &&
+                c.CheckOut.Date == co.Date) > 0;
+
+            HttpContext.Session.SetObject(SESSION_CART_KEY, cart);
+            if (removed) TempData["Success"] = "Item removed from cart.";
+            return Redirect("/Customer/Cart");
+        }
+
+        // POST: /Customer/Cart/Clear
+        [HttpPost("Clear")]
+        [ValidateAntiForgeryToken]
+        public IActionResult Clear()
+        {
+            HttpContext.Session.Remove(SESSION_CART_KEY);
+            TempData["Success"] = "Cart cleared.";
+            return Redirect("/Customer/Cart");
         }
     }
 }

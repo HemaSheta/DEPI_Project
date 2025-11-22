@@ -1,4 +1,5 @@
-﻿using Depi_Project.Data.UnitOfWork;
+﻿// Services/Implementations/BookingService.cs
+using Depi_Project.Data.UnitOfWork;
 using Depi_Project.Models;
 using Depi_Project.Services.Interfaces;
 
@@ -45,7 +46,7 @@ namespace Depi_Project.Services.Implementations
 
         public bool CreateBooking(Booking booking)
         {
-            // ⭐ Prevent user from booking overlapping dates
+            // Prevent user from booking overlapping dates (their own bookings)
             var userBookings = _unitOfWork.Bookings
                 .GetAll()
                 .Where(b => b.IdentityUserId == booking.IdentityUserId);
@@ -60,20 +61,15 @@ namespace Depi_Project.Services.Implementations
                     return false;
             }
 
-            // ⭐ Check room availability
+            // Check room availability
             if (!IsRoomAvailable(booking.RoomId, booking.CheckTime, booking.CheckOutTime))
                 return false;
 
-            // ⭐ Add booking
+            // Add booking
             _unitOfWork.Bookings.Add(booking);
 
-            // ⭐ Change room status to Booked
-            var room = _unitOfWork.Rooms.GetById(booking.RoomId);
-            if (room != null)
-            {
-                room.Status = "Booked";
-                _unitOfWork.Rooms.Update(room);
-            }
+            // IMPORTANT: do NOT change Room.Status here (Option A).
+            // The availability is derived from bookings only.
 
             _unitOfWork.Save();
             return true;
@@ -85,17 +81,7 @@ namespace Depi_Project.Services.Implementations
 
             if (booking != null)
             {
-                // Delete booking
                 _unitOfWork.Bookings.Delete(booking);
-
-                // Change room back to Available
-                var room = _unitOfWork.Rooms.GetById(booking.RoomId);
-                if (room != null)
-                {
-                    room.Status = "Available";
-                    _unitOfWork.Rooms.Update(room);
-                }
-
                 _unitOfWork.Save();
             }
         }

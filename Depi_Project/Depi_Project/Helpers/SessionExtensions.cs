@@ -12,8 +12,9 @@ namespace Depi_Project.Helpers
 
         public static T? GetObject<T>(this ISession session, string key)
         {
-            var s = session.GetString(key);
-            return s == null ? default : JsonSerializer.Deserialize<T>(s);
+            var str = session.GetString(key);
+            if (string.IsNullOrEmpty(str)) return default;
+            return JsonSerializer.Deserialize<T>(str);
         }
     }
 }

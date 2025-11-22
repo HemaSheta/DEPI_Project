@@ -8,18 +8,15 @@ namespace Depi_Project.Models
         public int RoomTypeId { get; set; }
 
         [Required]
+        [MaxLength(100)]
         public string RoomTypeName { get; set; }
-
-        [Required]
-        public string Description { get; set; }
 
         [Required]
         public float Price { get; set; }
 
         [Required]
-        public string NumOfPeople { get; set; }
+        public int NumOfPeople { get; set; }
 
-        // Navigation
         public ICollection<Room> Rooms { get; set; } = new List<Room>();
     }
 }

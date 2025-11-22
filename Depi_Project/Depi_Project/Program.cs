@@ -61,9 +61,19 @@ namespace Depi_Project
             builder.Services.AddScoped<IRoomTypeService, RoomTypeService>();
             builder.Services.AddScoped<IBookingService, BookingService>();
             builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+            builder.Services.AddSession();
 
             builder.Services.AddRazorPages();
             builder.Services.AddControllersWithViews();
+            // add session support
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(60);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
 
             var app = builder.Build();
 
@@ -76,6 +86,7 @@ namespace Depi_Project
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseSession();
 
             app.UseRouting();
 

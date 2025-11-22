@@ -1,61 +1,164 @@
-﻿@model List<Depi_Project.Models.Room>
-
+﻿@model List<Depi_Project.Models.CartItem>
 @{
-    ViewData["Title"] = "My Cart";
+    ViewData["Title"] = "Reservation Cart";
 }
 
-<div class="container mt-4" style="max-width:900px;">
-    <h2 class="fw-bold mb-3">Your Reservation Cart</h2>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
+<style>
+    .cart-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 25px;
+        box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+    }
+
+    .cart-header {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 25px;
+    }
+
+    .thumb-img {
+        width: 110px;
+        height: 75px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+
+    .price-box {
+        background: #f8f9fa;
+        padding: 18px;
+        border-radius: 10px;
+        font-size: 1.2rem;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .checkout-btn {
+        font-size: 1.2rem;
+        padding: 14px 22px;
+        border-radius: 12px;
+        font-weight: 700;
+    }
+</style>
+
+<div class="container py-4" style="max-width:1150px;">
+
+    <h2 class="cart-header">🛒 Reservation Cart</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info">Your cart is empty.</div>
-        <a href="/Customer/Room" class="btn btn-primary">Browse Rooms</a>
+        <div class="alert alert-info">
+            Your cart is empty. Browse <a href="/Customer/Room">Rooms</a>.
+        </div>
     }
     else
     {
-        <table class="table table-bordered table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>Room</th>
-                    <th>Type</th>
-                    <th>Image</th>
-                    <th>Price/Night</th>
-                    <th></th>
-                </tr>
-            </thead>
+        <div class="cart-card">
 
-            <tbody>
-                @foreach (var r in Model)
-                {
+            <table class="table table-hover align-middle">
+                <thead class="table-dark text-center">
                     <tr>
-                        <td>Room @r.RoomNum</td>
-                        <td>@r.RoomType?.RoomTypeName</td>
-                        <td><img src="@r.Slide1" width="100" /></td>
-                        <td>@r.RoomType?.Price EGP</td>
-
-                        <td>
-                            <button class="btn btn-danger btn-sm remove-btn" data-id="@r.RoomId">
-                                Remove
-                            </button>
-                        </td>
+                        <th>Room</th>
+                        <th>Preview</th>
+                        <th>Dates</th>
+                        <th>Price/Night</th>
+                        <th>Nights</th>
+                        <th>Total</th>
+                        <th></th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
 
-        <a href="/Customer/Booking/Create" class="btn btn-success">Continue to Booking</a>
+                <tbody>
+                    @foreach (var it in Model)
+                    {
+                        var nights = (it.CheckOut.Date - it.CheckIn.Date).Days;
+
+                        <tr>
+                            <td class="text-center">
+                                <strong>@it.RoomTitle</strong><br />
+                                <span class="text-muted">Room #@it.RoomNum</span>
+                            </td>
+
+                            <td class="text-center">
+                                <img src="@it.Slide" class="thumb-img" />
+                            </td>
+
+                            <td class="text-center">
+                                <strong>@it.CheckIn.ToString("yyyy-MM-dd")</strong><br />
+                                <small class="text-muted">→ @it.CheckOut.ToString("yyyy-MM-dd")</small>
+                            </td>
+
+                            <td class="text-center">@it.PricePerNight.ToString("F2")</td>
+
+                            <td class="text-center">@nights</td>
+
+                            <td class="text-center fw-bold">@it.TotalPrice.ToString("F2")</td>
+
+                            <td class="text-center">
+                                <form asp-action="Remove" method="post" class="d-inline">
+                                    <input type="hidden" name="roomId" value="@it.RoomId" />
+                                    <input type="hidden" name="checkIn" value="@it.CheckIn.ToString("yyyy-MM-dd")" />
+                                    <input type="hidden" name="checkOut" value="@it.CheckOut.ToString("yyyy-MM-dd")" />
+
+                                    <button type="submit"
+                                            class="btn btn-danger btn-sm"
+                                            style="border-radius:8px;">
+                                        Remove
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="d-flex justify-content-between align-items-center mt-4">
+
+                <form asp-action="Clear" method="post">
+                    <button class="btn btn-outline-secondary" type="submit">Clear Cart</button>
+                </form>
+
+                <div class="price-box">
+                    Total:
+                    <strong class="text-success">
+                        @Model.Sum(i => i.TotalPrice).ToString("F2")
+                    </strong> EGP
+
+                    <br />
+
+                    <a href="/Customer/Payments/CreateCheckoutFromCart"
+                       class="btn btn-success checkout-btn mt-2">
+                        Proceed to Checkout
+                    </a>
+                </div>
+            </div>
+
+        </div>
     }
 </div>
 
-@section Scripts {
-    <script>
-        $(".remove-btn").click(function () {
-            let id = $(this).data("id");
 
-            $.post(`/Customer/Cart/Remove/${id}`, function () {
-                location.reload();
-            });
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script>
+        $(function () {
+            var s = '@TempData["Success"]';
+            var e = '@TempData["Error"]';
+            if (s) toastr.success(s);
+            if (e) toastr.error(e);
         });
     </script>
 }

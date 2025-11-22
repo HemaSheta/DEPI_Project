@@ -19,6 +19,9 @@ namespace Depi_Project.Controllers.Admin
             _roomTypeService = roomTypeService;
         }
 
+        // ==========================
+        // INDEX
+        // ==========================
         [HttpGet("")]
         public IActionResult Index()
         {
@@ -26,6 +29,9 @@ namespace Depi_Project.Controllers.Admin
             return View("~/Views/Admin/Room/Index.cshtml", rooms);
         }
 
+        // ==========================
+        // CREATE (GET)
+        // ==========================
         [HttpGet("Create")]
         public IActionResult Create()
         {
@@ -33,14 +39,21 @@ namespace Depi_Project.Controllers.Admin
             return View("~/Views/Admin/Room/Create.cshtml");
         }
 
+        // ==========================
+        // CREATE (POST)
+        // ==========================
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Room room, IFormFile Slide1File, IFormFile Slide2File, IFormFile Slide3File)
+        public IActionResult Create(Room room, IFormFile Slide1File, IFormFile? Slide2File, IFormFile? Slide3File)
         {
+            // Remove ModelState keys so Slide2 & Slide3 become optional
             ModelState.Remove("RoomType");
             ModelState.Remove("Slide1");
             ModelState.Remove("Slide2");
             ModelState.Remove("Slide3");
+            ModelState.Remove("Room.Slide1");
+            ModelState.Remove("Room.Slide2");
+            ModelState.Remove("Room.Slide3");
 
             if (!ModelState.IsValid)
             {
@@ -48,7 +61,8 @@ namespace Depi_Project.Controllers.Admin
                 return View("~/Views/Admin/Room/Create.cshtml", room);
             }
 
-            if (Slide1File == null)
+            // Required Slide1
+            if (Slide1File == null || Slide1File.Length == 0)
             {
                 ModelState.AddModelError("Slide1File", "Slide 1 is required.");
                 ViewBag.RoomTypes = _roomTypeService.GetAllRoomTypes();
@@ -58,15 +72,15 @@ namespace Depi_Project.Controllers.Admin
             string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/rooms");
             Directory.CreateDirectory(folder);
 
-            // Slide1
+            // SAVE Slide1
             var f1 = Path.GetFileName(Slide1File.FileName);
             var p1 = Path.Combine(folder, f1);
             using (var st = new FileStream(p1, FileMode.Create))
                 Slide1File.CopyTo(st);
             room.Slide1 = "/images/rooms/" + f1;
 
-            // Slide2
-            if (Slide2File != null)
+            // SAVE Slide2 (optional)
+            if (Slide2File != null && Slide2File.Length > 0)
             {
                 var f2 = Path.GetFileName(Slide2File.FileName);
                 var p2 = Path.Combine(folder, f2);
@@ -75,8 +89,8 @@ namespace Depi_Project.Controllers.Admin
                 room.Slide2 = "/images/rooms/" + f2;
             }
 
-            // Slide3
-            if (Slide3File != null)
+            // SAVE Slide3 (optional)
+            if (Slide3File != null && Slide3File.Length > 0)
             {
                 var f3 = Path.GetFileName(Slide3File.FileName);
                 var p3 = Path.Combine(folder, f3);
@@ -89,11 +103,9 @@ namespace Depi_Project.Controllers.Admin
             return Redirect("/Admin/Room");
         }
 
-
-        // ============================
-        // EDIT — FIXED HERE 🔥
-        // ============================
-
+        // ==========================
+        // EDIT (GET)
+        // ==========================
         [HttpGet("Edit/{id}")]
         public IActionResult Edit(int id)
         {
@@ -104,6 +116,9 @@ namespace Depi_Project.Controllers.Admin
             return View("~/Views/Admin/Room/Edit.cshtml", room);
         }
 
+        // ==========================
+        // EDIT (POST)
+        // ==========================
         [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, Room formModel, IFormFile? Slide1File, IFormFile? Slide2File, IFormFile? Slide3File)
@@ -111,17 +126,17 @@ namespace Depi_Project.Controllers.Admin
             var room = _roomService.GetRoomById(id);
             if (room == null) return NotFound();
 
-            // Update basic fields
+            // Update base fields
             room.RoomNum = formModel.RoomNum;
-            room.Status = formModel.Status;
+            //room.Status = formModel.Status;
             room.Description = formModel.Description;
             room.RoomTypeId = formModel.RoomTypeId;
 
             string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/rooms");
             Directory.CreateDirectory(folder);
 
-            // Slide1
-            if (Slide1File != null)
+            // Replace Slide1
+            if (Slide1File != null && Slide1File.Length > 0)
             {
                 var f1 = Path.GetFileName(Slide1File.FileName);
                 var p1 = Path.Combine(folder, f1);
@@ -130,8 +145,8 @@ namespace Depi_Project.Controllers.Admin
                 room.Slide1 = "/images/rooms/" + f1;
             }
 
-            // Slide2
-            if (Slide2File != null)
+            // Replace Slide2
+            if (Slide2File != null && Slide2File.Length > 0)
             {
                 var f2 = Path.GetFileName(Slide2File.FileName);
                 var p2 = Path.Combine(folder, f2);
@@ -140,8 +155,8 @@ namespace Depi_Project.Controllers.Admin
                 room.Slide2 = "/images/rooms/" + f2;
             }
 
-            // Slide3
-            if (Slide3File != null)
+            // Replace Slide3
+            if (Slide3File != null && Slide3File.Length > 0)
             {
                 var f3 = Path.GetFileName(Slide3File.FileName);
                 var p3 = Path.Combine(folder, f3);
@@ -154,11 +169,9 @@ namespace Depi_Project.Controllers.Admin
             return Redirect("/Admin/Room");
         }
 
-
-        // ============================
-        // DELETE — FIXED HERE 🔥
-        // ============================
-
+        // ==========================
+        // DELETE (GET)
+        // ==========================
         [HttpGet("Delete/{id}")]
         public IActionResult Delete(int id)
         {
@@ -168,6 +181,9 @@ namespace Depi_Project.Controllers.Admin
             return View("~/Views/Admin/Room/Delete.cshtml", room);
         }
 
+        // ==========================
+        // DELETE (POST)
+        // ==========================
         [HttpPost("Delete/{id}")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)

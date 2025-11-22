@@ -1,5 +1,6 @@
 ﻿using Depi_Project.Data.Repository.Interfaces;
 using Depi_Project.Models;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Depi_Project.Data.UnitOfWork
 {
@@ -9,6 +10,10 @@ namespace Depi_Project.Data.UnitOfWork
         IGenericRepository<RoomType> RoomTypes { get; }
         IGenericRepository<Room> Rooms { get; }
         IGenericRepository<Booking> Bookings { get; }
+        AppDbContext Context { get; }
+
+        // existing members...
+        IDbContextTransaction BeginTransaction();
 
         int Save();
     }

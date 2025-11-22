@@ -1,80 +1,117 @@
 ﻿@model IEnumerable<Depi_Project.Models.Room>
-
 @{
     ViewData["Title"] = "Available Rooms";
+    var filter = ViewBag.Filter;
+    var roomTypes = ViewBag.RoomTypes as IEnumerable<Depi_Project.Models.RoomType> ?? Enumerable.Empty<Depi_Project.Models.RoomType>();
+    var bookedTodayIds = ViewBag.BookedTodayIds as HashSet<int> ?? new HashSet<int>();
 }
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
 
-<h2 class="mb-4">Available Rooms</h2>
+<style>
+    .filter-card { border-radius:12px;padding:16px;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.05);margin-bottom:20px; }
+    .room-card { border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.12); transition: transform .2s;background:#fff;}
+    .room-card:hover { transform: translateY(-6px); }
+    .room-img { height:200px;width:100%;object-fit:cover; }
+    .room-title { font-weight:700;font-size:1.15rem; }
+    .price-tag { background:#111;color:white;padding:6px 10px;border-radius:6px;font-weight:700; }
+</style>
 
-<div class="row">
-    @foreach (var room in Model)
-    {
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 shadow-sm">
-                <img class="card-img-top" src="@room.Slide1" style="height:200px; object-fit:cover;" />
+<div class="container py-4" style="max-width:1150px;">
+    <h2 class="fw-bold mb-3">Rooms</h2>
 
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">Room @room.RoomNum</h5>
-                    <p class="flex-grow-1">@room.Description</p>
-                    <p><strong>Type:</strong> @room.RoomType?.RoomTypeName</p>
-                    <p><strong>Price: </strong>@room.RoomType?.Price EGP / night</p>
+    <div class="filter-card mb-4">
+        <form method="get" class="row g-2">
+            <div class="col-md-2">
+                <label class="form-label">Room Type</label>
+                <select name="roomType" class="form-select">
+                    <option value="">All</option>
+                    @foreach (var t in roomTypes)
+                    {
+                        <option value="@t.RoomTypeId" @@(filter.roomType != null && filter.roomType == t.RoomTypeId ? "selected" : "")>
+                            @t.RoomTypeName
+                        </option>
+                    }
+                </select>
+            </div>
 
-                    <div class="mb-2">
-                        <div class="row gx-2">
-                            <div class="col">
-                                <input type="date" class="form-control form-control-sm ci-@room.RoomId" />
+            <div class="col-md-2">
+                <label class="form-label">From</label>
+                <input name="checkIn" type="date" class="form-control" value="@filter.checkIn" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">To</label>
+                <input name="checkOut" type="date" class="form-control" value="@filter.checkOut" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Min Price</label>
+                <input name="minPrice" type="number" step="0.01" class="form-control" value="@filter.minPrice" placeholder="0" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Max Price</label>
+                <input name="maxPrice" type="number" step="0.01" class="form-control" value="@filter.maxPrice" placeholder="Any" />
+            </div>
+
+            <div class="col-md-1">
+                <label class="form-label">People</label>
+                <input name="persons" type="number" min="1" class="form-control" value="@(filter.persons ?? "")" />
+            </div>
+
+            <div class="col-md-6 mt-2">
+                <label class="form-label">Search</label>
+                <input name="search" type="text" class="form-control" value="@filter.search" placeholder="Room number, type, description..." />
+            </div>
+
+            <div class="col-md-6 mt-2 d-flex align-items-end">
+                <button class="btn btn-primary me-2">Apply Filters</button>
+                <a href="/Customer/Room" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="row">
+        @foreach (var room in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="room-card">
+                    <img src="@room.Slide1" class="room-img" />
+                    <div class="p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <div class="room-title">Room @room.RoomNum</div>
+                                <div class="text-muted small">@room.RoomType?.RoomTypeName</div>
                             </div>
-                            <div class="col">
-                                <input type="date" class="form-control form-control-sm co-@room.RoomId" />
+                            <div class="text-end">
+                                <div class="price-tag">@room.RoomType?.Price EGP</div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="d-flex gap-2">
-                        <a href="/Customer/Room/Details/@room.RoomId" class="btn btn-primary btn-sm">View Details</a>
-                        <button class="btn btn-outline-success btn-sm add-quick" data-roomid="@room.RoomId" data-price="@room.RoomType?.Price ?? 0">Add to Cart</button>
+                        <p class="text-muted small mb-2">@room.Description</p>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                @{
+                                    // today's booking flag (computed in controller)
+                                    bool bookedToday = bookedTodayIds.Contains(room.RoomId);
+                                }
+                                <span class="badge @(bookedToday ? "bg-warning text-dark" : "bg-success")">
+                                    @(bookedToday ? "Booked Today" : "Available")
+                                </span>
+                            </div>
+
+                            <a href="/Customer/Room/Details/@room.RoomId" class="btn btn-dark">View Details</a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">No rooms found for the selected filters.</div>
     }
 </div>
-
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
-<script>
-    $(function () {
-        $(".add-quick").click(function () {
-            var roomId = $(this).data("roomid");
-            var checkIn = $(".ci-" + roomId).val();
-            var checkOut = $(".co-" + roomId).val();
-
-            if (!checkIn || !checkOut) {
-                toastr.error("Pick check-in and check-out dates before adding to cart.");
-                return;
-            }
-
-            var payload = { roomId: parseInt(roomId), checkIn: checkIn, checkOut: checkOut };
-
-            fetch('/Customer/Cart/Add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(r => r.json())
-            .then(j => {
-                if (j.success) {
-                    toastr.success("Added to cart");
-                    $("#cartCountBadge").text(j.count);
-                } else if (j.error) {
-                    toastr.error(j.error);
-                } else {
-                    toastr.error("Could not add to cart");
-                }
-            });
-        });
-    });
-</script>

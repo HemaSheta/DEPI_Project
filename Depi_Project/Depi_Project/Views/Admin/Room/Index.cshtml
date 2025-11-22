@@ -19,7 +19,6 @@
                 <tr>
                     <th>Room #</th>
                     <th>Description</th>
-                    <th>Status</th>
                     <th>Room Type</th>
                     <th>Price</th>
                     <th class="text-center">Slide 1</th>
@@ -35,15 +34,6 @@
                     <tr>
                         <td>@room.RoomNum</td>
                         <td>@room.Description</td>
-
-                        <td>
-                            <span class="badge
-                                    @(room.Status == "Available" ? "bg-success" :
-                                                                    room.Status == "Booked" ? "bg-warning text-dark" :
-                                                                    "bg-danger")">
-                            @room.Status
-                        </span>
-                    </td>
 
                         <td>@room.RoomType?.RoomTypeName</td>
                         <td>@room.RoomType?.Price</td>

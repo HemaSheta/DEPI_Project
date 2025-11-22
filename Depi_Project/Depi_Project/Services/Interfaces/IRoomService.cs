@@ -1,4 +1,5 @@
-﻿using Depi_Project.Models;
+﻿// Services/Interfaces/IRoomService.cs
+using Depi_Project.Models;
 
 namespace Depi_Project.Services.Interfaces
 {
@@ -10,5 +11,15 @@ namespace Depi_Project.Services.Interfaces
         void UpdateRoom(Room room);
         void DeleteRoom(int id);
         IEnumerable<Room> GetAvailableRooms();
+
+        // Filtering for customers (date-based availability)
+        IEnumerable<Room> GetRoomsFiltered(
+            int? roomType,
+            DateTime? checkIn,
+            DateTime? checkOut,
+            float? minPrice,
+            float? maxPrice,
+            int? persons,
+            string? search);
     }
 }
