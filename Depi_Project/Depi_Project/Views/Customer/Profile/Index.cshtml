@@ -5,6 +5,7 @@
 }
 
 <div class="container py-4" style="max-width:1100px;">
+
     <div class="row mb-4">
         <div class="col-md-8">
             <div class="card shadow-sm">
@@ -19,21 +20,9 @@
                         </div>
 
                         <div class="col-md-8">
-                            @* Email: prefer Identity navigation if present, else fallback to ProfileViewModel.Profile.IdentityUserId lookup *@
-                            @{
-                                var email = Model.Profile?.IdentityUser?.Email;
-                                // if not available try to load from IdentityId (controller already attached IdentityUser).
-                                if (string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(Model.Profile?.IdentityUserId))
-                                {
-                                    // controller attaches IdentityUser when possible, so this is a fallback.
-                                    email = Model.Profile?.IdentityUser?.Email ?? "—";
-                                }
-                                var phone = Model.Profile?.Phone ?? "—";
-                            }
-
-                            <p class="mb-1"><strong>Email:</strong> @email</p>
-                            <p class="mb-1"><strong>Phone:</strong> @phone</p>
-                            <p class="mb-1"><strong>IdentityUserId:</strong> @Model.Profile?.IdentityUserId</p>
+                            <p class="mb-1"><strong>Email:</strong> @Model.Profile?.IdentityUser?.Email</p>
+                            <p class="mb-1"><strong>Phone:</strong> @Model.Profile?.Phone</p>
+                            <p class="mb-1"><strong>Name:</strong> @(Model.Profile != null ? $"{Model.Profile.FirstName} {Model.Profile.LastName}" : "—")</p>
 
                             <div class="mt-3">
                                 <a href="/Customer/Profile/Edit" class="btn btn-outline-primary btn-sm">Edit Profile</a>
@@ -76,6 +65,8 @@
                             <th>Check-Out</th>
                             <th>Total</th>
                             <th>Payment</th>
+                            <th>Status</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -101,10 +92,35 @@
                                     {
                                         <span class="badge bg-success">Paid</span>
                                     }
-                                    else
+                                    else if (b.PaymentStatus == "Pending")
                                     {
                                         <span class="badge bg-warning text-dark">Pending</span>
                                     }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Not Paid</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (b.Status == "Approved")
+                                    {
+                                        <span class="badge bg-success">Approved</span>
+                                    }
+                                    else if (b.Status == "Pending")
+                                    {
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Canceled</span>
+                                    }
+                                </td>
+                                <td>
+                                    @* Cancel button for upcoming bookings *@
+                                    <form asp-controller="Booking" asp-action="Cancel" method="post" onsubmit="return confirm('Cancel this booking?');">
+                                        <input type="hidden" name="id" value="@b.BookingId" />
+                                        <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
+                                    </form>
                                 </td>
                             </tr>
                         }
@@ -133,6 +149,7 @@
                             <th>Check-Out</th>
                             <th>Total</th>
                             <th>Payment</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -158,9 +175,27 @@
                                     {
                                         <span class="badge bg-success">Paid</span>
                                     }
-                                    else
+                                    else if (b.PaymentStatus == "Pending")
                                     {
                                         <span class="badge bg-warning text-dark">Pending</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Not Paid</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (b.Status == "Approved")
+                                    {
+                                        <span class="badge bg-success">Approved</span>
+                                    }
+                                    else if (b.Status == "Pending")
+                                    {
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Canceled</span>
                                     }
                                 </td>
                             </tr>

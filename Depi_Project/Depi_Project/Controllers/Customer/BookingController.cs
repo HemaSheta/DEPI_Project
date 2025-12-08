@@ -3,6 +3,7 @@ using Depi_Project.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace Depi_Project.Controllers.Customer
 {
@@ -46,7 +47,13 @@ namespace Depi_Project.Controllers.Customer
                 // Attach the logged-in user's ID to the booking
                 booking.IdentityUserId = identityUserId;
 
-                // Create booking
+                // Ensure PaymentStatus/Status business defaults:
+                if (string.IsNullOrWhiteSpace(booking.PaymentStatus))
+                    booking.PaymentStatus = "Pending";
+
+                if (string.IsNullOrWhiteSpace(booking.Status))
+                    booking.Status = (string.Equals(booking.PaymentStatus, "Paid", System.StringComparison.OrdinalIgnoreCase)) ? "Approved" : "Pending";
+
                 bool created = _bookingService.CreateBooking(booking);
 
                 if (!created)
@@ -64,6 +71,34 @@ namespace Depi_Project.Controllers.Customer
         public IActionResult Success()
         {
             return View();
+        }
+
+        // POST: /Customer/Booking/Cancel/5  (customer cancels own booking)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Cancel(int id)
+        {
+            var identityUserId = _userManager.GetUserId(User);
+            var booking = _bookingService.GetBookingById(id);
+            if (booking == null) return NotFound();
+
+            // ensure the user owns this booking (admin uses Admin controller)
+            if (!string.Equals(booking.IdentityUserId, identityUserId, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return Forbid();
+            }
+
+            bool ok = _bookingService.CancelBookingSoft(id);
+            if (!ok)
+            {
+                TempData["Error"] = "Could not cancel the booking.";
+            }
+            else
+            {
+                TempData["Success"] = "Booking canceled.";
+            }
+
+            return RedirectToAction("Bookings", "Profile");
         }
     }
 }

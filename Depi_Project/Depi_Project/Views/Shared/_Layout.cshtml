@@ -23,6 +23,7 @@
         body {
             display: flex;
             flex-direction: column;
+            background: #f7f8fb;
         }
 
         main {
@@ -31,10 +32,11 @@
 
         /* NAVBAR */
         .navbar-custom {
-            background-color: #111 !important;
+            background-color: #0b0b0b !important;
             position: sticky;
             top: 0;
             z-index: 1030;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
         }
 
             .navbar-custom .navbar-brand {
@@ -48,6 +50,57 @@
                 color: #fff !important;
                 font-size: 16px;
             }
+
+        /* Toggler (make icon visible on dark bg) */
+        .navbar-toggler {
+            border-color: rgba(255,255,255,0.08);
+        }
+
+        .navbar-toggler-icon {
+            background-image: none;
+            color: #fff;
+        }
+
+        .navbar-toggler .bi-list {
+            font-size: 1.25rem;
+            color: #fff;
+        }
+
+        /* AUTH BUTTONS (consistent look) */
+        .btn-auth {
+            background: linear-gradient(90deg, #ffcc33 0%, #ffb300 100%);
+            color: #111 !important;
+            border: none;
+            font-weight: 700;
+            padding: 8px 12px;
+            border-radius: 999px;
+            box-shadow: 0 4px 14px rgba(255,179,0,0.15);
+        }
+
+            .btn-auth:hover, .btn-auth:focus {
+                transform: translateY(-1px);
+                box-shadow: 0 6px 20px rgba(255,179,0,0.18);
+                color: #111 !important;
+            }
+
+        .btn-auth-ghost {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.06);
+            padding: 7px 12px;
+            border-radius: 999px;
+        }
+
+            .btn-auth-ghost:hover {
+                background: rgba(255,255,255,0.12);
+                color: #fff;
+                transform: translateY(-1px);
+            }
+
+        /* small adjustments for profile dropdown text */
+        .nav .dropdown-menu {
+            min-width: 210px;
+        }
 
         /* FOOTER */
         .footer-modern {
@@ -95,6 +148,13 @@
                 color: #fff;
                 text-decoration: underline;
             }
+
+        /* cart badge smaller on high-DPI */
+        #cartCountBadge {
+            font-size: 10px;
+            min-width: 18px;
+            padding: 2px 5px;
+        }
     </style>
 </head>
 
@@ -106,8 +166,8 @@
 
             <a class="navbar-brand" asp-controller="Home" asp-action="Index">Bookify</a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarItems">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarItems" aria-controls="navbarItems" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="bi bi-list"></i>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarItems">
@@ -199,10 +259,14 @@
                     else
                     {
                         <li class="nav-item me-2">
-                            <a class="btn btn-outline-success btn-sm" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                            <a class="btn btn-auth-ghost btn-sm" asp-area="Identity" asp-page="/Account/Login">
+                                <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-outline-primary btn-sm" asp-area="Identity" asp-page="/Account/Register">Register</a>
+                            <a class="btn btn-auth btn-sm" asp-area="Identity" asp-page="/Account/Register">
+                                <i class="bi bi-pencil-square me-1"></i> Register
+                            </a>
                         </li>
                     }
                 </ul>

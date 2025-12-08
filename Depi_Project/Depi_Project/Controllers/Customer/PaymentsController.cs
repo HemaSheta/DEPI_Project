@@ -1,11 +1,14 @@
-﻿using Depi_Project.Helpers;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using Depi_Project.Data.UnitOfWork;
+using Depi_Project.Helpers;
 using Depi_Project.Models;
 using Depi_Project.Services.Interfaces;
-using Depi_Project.Data.UnitOfWork;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Depi_Project.Controllers.Customer
 {
@@ -17,8 +20,7 @@ namespace Depi_Project.Controllers.Customer
         private readonly IBookingService _bookingService;
         private readonly IUnitOfWork _unitOfWork;
 
-        // session cart key must match your cart controller
-        private const string SESSION_CART_KEY = "reservation_cart_v1";
+        private const string SESSION_CART_PREFIX = "reservation_cart_v1";
 
         public PaymentsController(
             UserManager<IdentityUser> userManager,
@@ -26,76 +28,83 @@ namespace Depi_Project.Controllers.Customer
             IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
-            _bookingService = bookingService;
+            _bookingService = bookingService;   // FIXED
             _unitOfWork = unitOfWork;
         }
 
-        // GET: /Customer/Payments/CheckoutFromCart
-        // This will create bookings (PaymentStatus = Not Paid), clear the cart and return JSON (AJAX) with redirect url.
+        private string GetCartKey()
+        {
+            var uid = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(uid))
+                return $"{SESSION_CART_PREFIX}_user_{uid}";
+
+            var sid = HttpContext?.Session?.Id;
+            if (string.IsNullOrEmpty(sid))
+            {
+                HttpContext?.Session?.SetString("__session_init", "1");
+                sid = HttpContext?.Session?.Id ?? Guid.NewGuid().ToString();
+            }
+
+            return $"{SESSION_CART_PREFIX}_session_{sid}";
+        }
+
         [HttpGet]
-        public async Task<IActionResult> CheckoutFromCart()
+        public IActionResult CheckoutFromCart()
         {
             try
             {
-                var cart = HttpContext.Session.GetObject<List<CartItem>>(SESSION_CART_KEY) ?? new List<CartItem>();
+                var cart = HttpContext.Session.GetObject<List<CartItem>>(GetCartKey()) ?? new List<CartItem>();
                 if (!cart.Any())
-                {
-                    return Json(new { error = "CartEmpty", message = "Your cart is empty." });
-                }
+                    return BadRequest(new { error = "CartEmpty", message = "Your cart is empty." });
 
-                // 1) Validate cart internal overlap (customer rule: cannot book multiple overlapping items)
+                // -------- 1. OVERLAP INSIDE CART --------
                 for (int i = 0; i < cart.Count; i++)
                 {
                     for (int j = i + 1; j < cart.Count; j++)
                     {
                         var a = cart[i];
                         var b = cart[j];
-                        bool overlap = a.CheckIn < b.CheckOut && a.CheckOut > b.CheckIn;
-                        if (overlap)
-                        {
-                            return Json(new { error = "OverlapInCart", message = "Cart contains two items that overlap in dates. Remove one." });
-                        }
+                        if (a.CheckIn < b.CheckOut && a.CheckOut > b.CheckIn)
+                            return BadRequest(new { error = "OverlapInCart", message = "Cart contains overlapping dates." });
                     }
                 }
 
-                // 2) Validate availability against current bookings in DB
+                // -------- 2. CHECK ROOM AVAILABILITY --------
                 foreach (var c in cart)
                 {
                     if (!_bookingService.IsRoomAvailable(c.RoomId, c.CheckIn, c.CheckOut))
                     {
-                        return Json(new { error = "RoomUnavailable", message = $"Room #{c.RoomNum} is no longer available for the selected dates." });
+                        return BadRequest(new
+                        {
+                            error = "RoomUnavailable",
+                            message = $"Room #{c.RoomNum} is no longer available."
+                        });
                     }
                 }
 
-                // 3) Validate user doesn't have conflicting booking
+                // -------- 3. USER OVERLAP (IGNORE CANCELED BOOKINGS) --------
                 var identityId = _userManager.GetUserId(User);
                 if (string.IsNullOrEmpty(identityId))
-                    return Json(new { error = "NotAuthenticated", message = "Could not determine logged-in user. Please re-login." });
+                    return BadRequest(new { error = "NotAuthenticated", message = "Login again." });
 
                 var userBookings = _bookingService.GetAllBookings()
-                    .Where(b => b.IdentityUserId == identityId)
+                    .Where(b => b.IdentityUserId == identityId && b.Status != "Canceled")
                     .ToList();
 
                 foreach (var c in cart)
                 {
                     foreach (var ub in userBookings)
                     {
-                        bool overlap = c.CheckIn < ub.CheckOutTime && c.CheckOut > ub.CheckTime;
-                        if (overlap)
-                        {
-                            return Json(new { error = "UserOverlap", message = "You already have a booking that overlaps one of the cart items. Remove the conflicting item." });
-                        }
+                        if (c.CheckIn < ub.CheckOutTime && c.CheckOut > ub.CheckTime)
+                            return BadRequest(new
+                            {
+                                error = "UserOverlap",
+                                message = "You already have a booking that overlaps one of the selected dates."
+                            });
                     }
                 }
 
-                // Fetch identity user entity (important: assign both FK and navigation)
-                var identityUser = await _userManager.FindByIdAsync(identityId);
-                if (identityUser == null)
-                {
-                    return Json(new { error = "NotFoundUser", message = "Logged-in user not found." });
-                }
-
-                // 4) All validations passed -> create bookings inside a transaction
+                // -------- 4. CREATE BOOKINGS (TRANSACTION) --------
                 using (var tx = _unitOfWork.BeginTransaction())
                 {
                     try
@@ -105,46 +114,47 @@ namespace Depi_Project.Controllers.Customer
                             var booking = new Booking
                             {
                                 RoomId = item.RoomId,
-                                IdentityUserId = identityId,     // set FK explicitly
-                                IdentityUser = identityUser,     // set navigation object too (ensures EF tracks relationship)
+                                IdentityUserId = identityId,
                                 CheckTime = item.CheckIn,
                                 CheckOutTime = item.CheckOut,
                                 TotalPrice = item.TotalPrice,
-                                PaymentStatus = "Not Paid"
+                                PaymentStatus = "Not Paid",
+                                Status = "Pending"
                             };
 
-                            // Validate business rules again for this constructed booking
-                            if (!_bookingService.ValidateBooking(booking, out string error))
+                            if (!_bookingService.ValidateBooking(booking, out string errorMsg))
                             {
                                 tx.Rollback();
-                                return Json(new { error = "ValidationFailed", message = error });
+                                return BadRequest(new { error = "ValidationFailed", message = errorMsg });
                             }
 
-                            // Add booking to UoW
-                            _unitOfWork.Bookings.Add(booking);
+                            if (!_bookingService.CreateBooking(booking))
+                            {
+                                tx.Rollback();
+                                return StatusCode(500, new { error = "CreateFailed", message = "Could not create booking." });
+                            }
                         }
 
-                        // Save + commit
                         _unitOfWork.Save();
                         tx.Commit();
                     }
-                    catch (Exception exTx)
+                    catch (Exception ex)
                     {
                         try { tx.Rollback(); } catch { }
-                        return Json(new { error = "ServerError", message = $"Server error while creating Bookings. {exTx.Message}" });
+                        return StatusCode(500, new { error = "ServerError", message = ex.Message });
                     }
                 }
 
-                // 5) Clear cart
-                HttpContext.Session.Remove(SESSION_CART_KEY);
+                // -------- 5. CLEAR CART --------
+                HttpContext.Session.Remove(GetCartKey());
 
-                // Return success JSON with redirect url to Success page (client will redirect)
-                var successUrl = Url.Action("Success", "Cart", new { area = "" }) ?? "/Customer/Cart/Success";
-                return Json(new { url = successUrl });
+                // Redirect URL
+                var url = $"{Request.Scheme}://{Request.Host}/Customer/Cart/Success";
+                return Ok(new { url });
             }
             catch (Exception ex)
             {
-                return Json(new { error = "ServerError", message = $"Server error while creating Bookings. {ex.Message}" });
+                return StatusCode(500, new { error = "ServerError", message = ex.Message });
             }
         }
     }

@@ -14,7 +14,7 @@ namespace Depi_Project.Models
 
         // Use IdentityUser's Id (string) as the FK
         [Required]
-        [ForeignKey(nameof(IdentityUser))] // ensure EF uses this as FK for the IdentityUser navigation
+        [ForeignKey(nameof(IdentityUser))]
         public string IdentityUserId { get; set; }
 
         // Navigation
@@ -29,9 +29,15 @@ namespace Depi_Project.Models
         [Required]
         public float TotalPrice { get; set; }
 
+        // PaymentStatus: Paid | Pending | Not Paid
         [Required]
         [RegularExpression("Paid|Pending|Not Paid", ErrorMessage = "PaymentStatus must be ( Paid , Pending , Not Paid )")]
         public string PaymentStatus { get; set; } = "Pending";
+
+        // Booking workflow status: Approved | Canceled | Pending
+        [Required]
+        [RegularExpression("Approved|Canceled|Pending", ErrorMessage = "Status must be ( Approved , Canceled , Pending )")]
+        public string Status { get; set; } = "Pending";
 
         public Room Room { get; set; }
     }

@@ -1,8 +1,10 @@
-﻿// Services/Implementations/BookingService.cs
-using Depi_Project.Data.UnitOfWork;
+﻿using Depi_Project.Data.UnitOfWork;
 using Depi_Project.Models;
 using Depi_Project.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Depi_Project.Services.Implementations
 {
@@ -37,11 +39,12 @@ namespace Depi_Project.Services.Implementations
         }
 
         // Check if room is free during a specific date range
+        // Ignores bookings that are canceled (Status == "Canceled")
         public bool IsRoomAvailable(int roomId, DateTime checkIn, DateTime checkOut)
         {
             var bookings = _unitOfWork.Bookings
                 .GetAll()
-                .Where(b => b.RoomId == roomId);
+                .Where(b => b.RoomId == roomId && !string.Equals(b.Status, "Canceled", StringComparison.OrdinalIgnoreCase));
 
             foreach (var b in bookings)
             {
@@ -79,7 +82,7 @@ namespace Depi_Project.Services.Implementations
                 return false;
             }
 
-            // 1) Check room availability (against all bookings)
+            // 1) Check room availability (against all non-canceled bookings)
             if (!IsRoomAvailable(booking.RoomId, booking.CheckTime, booking.CheckOutTime))
             {
                 error = "Room is not available for the selected dates.";
@@ -91,7 +94,7 @@ namespace Depi_Project.Services.Implementations
             {
                 var userBookings = _unitOfWork.Bookings
                     .GetAll()
-                    .Where(b => b.IdentityUserId == booking.IdentityUserId);
+                    .Where(b => b.IdentityUserId == booking.IdentityUserId && !string.Equals(b.Status, "Canceled", StringComparison.OrdinalIgnoreCase));
 
                 foreach (var b in userBookings)
                 {
@@ -113,10 +116,23 @@ namespace Depi_Project.Services.Implementations
 
         public bool CreateBooking(Booking booking)
         {
+            if (booking == null) return false;
+
+            // Default business status
+            if (string.IsNullOrWhiteSpace(booking.Status))
+                booking.Status = "Pending";
+
+            // Enforce payment->status rule at creation time:
+            // If payment status is "Paid" then mark Approved; otherwise keep "Pending"
+            if (string.Equals(booking.PaymentStatus, "Paid", StringComparison.OrdinalIgnoreCase))
+            {
+                booking.Status = "Approved";
+            }
+
             // Prevent user from booking overlapping dates (their own bookings)
             var userBookings = _unitOfWork.Bookings
                 .GetAll()
-                .Where(b => b.IdentityUserId == booking.IdentityUserId);
+                .Where(b => b.IdentityUserId == booking.IdentityUserId && !string.Equals(b.Status, "Canceled", StringComparison.OrdinalIgnoreCase));
 
             foreach (var b in userBookings)
             {
@@ -128,20 +144,32 @@ namespace Depi_Project.Services.Implementations
                     return false;
             }
 
-            // Check room availability (against all bookings)
+            // Check room availability (against all non-canceled bookings)
             if (!IsRoomAvailable(booking.RoomId, booking.CheckTime, booking.CheckOutTime))
                 return false;
 
             // Add booking
             _unitOfWork.Bookings.Add(booking);
 
-            // IMPORTANT: do NOT change Room.Status here (we keep date-based availability).
-            // Availability should be derived from bookings.
-
+            // IMPORTANT: do NOT change Room.Status here (date-based availability).
             _unitOfWork.Save();
             return true;
         }
 
+        // Soft cancel - mark as Canceled (keeps record)
+        public bool CancelBookingSoft(int id)
+        {
+            var booking = _unitOfWork.Bookings.GetById(id);
+            if (booking == null) return false;
+
+            // set status to Canceled — this will make date available in IsRoomAvailable checks
+            booking.Status = "Canceled";
+            _unitOfWork.Bookings.Update(booking);
+            _unitOfWork.Save();
+            return true;
+        }
+
+        // Hard delete (existing method name kept for backward compatibility)
         public void CancelBooking(int id)
         {
             var booking = _unitOfWork.Bookings.GetById(id);

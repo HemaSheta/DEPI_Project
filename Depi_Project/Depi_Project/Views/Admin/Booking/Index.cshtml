@@ -37,6 +37,21 @@
         color: white;
     }
 
+    .badge-approved {
+        background: #198754 !important;
+        color: white;
+    }
+
+    .badge-pending {
+        background: #ffc107 !important;
+        color: #000;
+    }
+
+    .badge-canceled {
+        background: #dc3545 !important;
+        color: white;
+    }
+
     .btn-small {
         padding: 3px 8px;
         font-size: 0.85rem;
@@ -72,7 +87,7 @@
                     <option value="">All</option>
                     @foreach (var r in rooms)
                     {
-                        <option value="@r.RoomId" @@(ViewBag.RoomId != null && ViewBag.RoomId == r.RoomId ? "selected" : "")>
+                        <option value="@r.RoomId" @@(ViewBag.RoomId !=null && ViewBag.RoomId= =r.RoomId ? "selected" : "" )>
                             Room @r.RoomNum (@r.RoomType?.RoomTypeName)
                         </option>
                     }
@@ -85,7 +100,7 @@
                     <option value="">All</option>
                     @foreach (var ps in paymentStatuses)
                     {
-                        <option value="@ps" @@(ps == (ViewBag.PaymentStatus ?? "") ? "selected" : "")>@ps</option>
+                        <option value="@ps" @@(ps= =(ViewBag.PaymentStatus ?? "" ) ? "selected" : "" )>@ps</option>
                     }
                 </select>
             </div>
@@ -109,7 +124,8 @@
                     <th>Check-Out</th>
                     <th>Total</th>
                     <th>Payment</th>
-                    <th style="width: 130px;">Actions</th>
+                    <th>Status</th>
+                    <th style="width: 180px;">Actions</th>
                 </tr>
             </thead>
 
@@ -153,9 +169,28 @@
                             {
                                 <span class="badge badge-paid">Paid</span>
                             }
+                            else if (b.PaymentStatus == "Pending")
+                            {
+                                <span class="badge badge-pending">Pending</span>
+                            }
                             else
                             {
                                 <span class="badge badge-notpaid">Not Paid</span>
+                            }
+                        </td>
+
+                        <td>
+                            @if (b.Status == "Approved")
+                            {
+                                <span class="badge badge-approved">Approved</span>
+                            }
+                            else if (b.Status == "Pending")
+                            {
+                                <span class="badge badge-pending">Pending</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-canceled">Canceled</span>
                             }
                         </td>
 
@@ -165,6 +200,11 @@
 
                             <a class="btn btn-outline-warning btn-sm btn-small"
                                href="/Admin/Booking/EditPayment/@b.BookingId">Edit</a>
+
+                            @* Cancel form (soft cancel) *@
+                            <form asp-controller="Booking" asp-action="Cancel" asp-route-id="@b.BookingId" method="post" style="display:inline-block;" onsubmit="return confirm('Cancel this booking?');">
+                                <button class="btn btn-outline-danger btn-sm btn-small" type="submit">Cancel</button>
+                            </form>
                         </td>
                     </tr>
                 }

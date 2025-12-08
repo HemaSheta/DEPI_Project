@@ -43,28 +43,6 @@ namespace Depi_Project.Controllers.Admin
 
             var ctx = _unitOfWork.Context;
 
-            // Auto-update expired bookings payment status:
-            try
-            {
-                var today = DateTime.Today;
-                var expired = ctx.Bookings
-                                 .Where(b => b.CheckOutTime.Date < today && b.PaymentStatus != "Paid" && b.PaymentStatus != "Not Paid")
-                                 .ToList();
-                if (expired.Any())
-                {
-                    foreach (var eb in expired)
-                    {
-                        eb.PaymentStatus = "Not Paid";
-                        ctx.Bookings.Update(eb);
-                    }
-                    _unitOfWork.Save();
-                }
-            }
-            catch
-            {
-                // ignore failures here (non-fatal)
-            }
-
             // Start query: include related Room -> RoomType and IdentityUser
             var q = ctx.Bookings
                 .Include(b => b.Room)
@@ -141,7 +119,7 @@ namespace Depi_Project.Controllers.Admin
             ViewBag.RoomId = roomId;
             ViewBag.PaymentStatus = paymentStatus ?? "";
 
-            // Return the view model list (change view to accept this list)
+            // Return the view model list
             return View("~/Views/Admin/Booking/Index.cshtml", vm);
         }
 
@@ -177,10 +155,47 @@ namespace Depi_Project.Controllers.Admin
             if (booking == null) return NotFound();
 
             booking.PaymentStatus = paymentStatus;
+
+            // If admin marks payment as Paid -> mark booking Approved automatically
+            if (string.Equals(paymentStatus, "Paid", StringComparison.OrdinalIgnoreCase))
+            {
+                booking.Status = "Approved";
+            }
+            else
+            {
+                // If payment is Pending or Not Paid -> keep status Pending (unless explicitly canceled)
+                if (!string.Equals(booking.Status, "Canceled", StringComparison.OrdinalIgnoreCase))
+                {
+                    booking.Status = "Pending";
+                }
+            }
+
             _unitOfWork.Bookings.Update(booking);
             _unitOfWork.Save();
 
             TempData["Success"] = "Payment status updated.";
+            return Redirect("/Admin/Booking");
+        }
+
+        // POST: /Admin/Booking/Cancel/5  (admin soft-cancel)
+        [HttpPost("Cancel/{id}")]
+        [ValidateAntiForgeryToken]
+        public IActionResult Cancel(int id)
+        {
+            var booking = _booking_service_or_null(id);
+            if (booking == null) return NotFound();
+
+            // Soft cancel via service
+            bool ok = _bookingService.CancelBookingSoft(id);
+            if (!ok)
+            {
+                TempData["Error"] = "Could not cancel booking.";
+            }
+            else
+            {
+                TempData["Success"] = "Booking canceled.";
+            }
+
             return Redirect("/Admin/Booking");
         }
 
