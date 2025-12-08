@@ -5,105 +5,164 @@
 }
 
 <style>
+    /* Page background only */
     body {
-        background: linear-gradient(135deg, #3A8DFF, #6CC3FF);
-        background-attachment: fixed;
-        font-family: 'Segoe UI', sans-serif;
+        margin: 0;
+        font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+        background: radial-gradient(circle at 10% 20%, rgba(58,141,255,0.08), transparent 10%), radial-gradient(circle at 90% 80%, rgba(108,195,255,0.06), transparent 12%), linear-gradient(135deg, #0f172a 0%, #0b2540 50%, #06304a 100%);
+        color: #e6eef8;
     }
 
+    /* wrapper below navbar */
+    .login-wrapper {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 16px;
+        box-sizing: border-box;
+    }
+
+    /* Login container */
     .login-container {
-        max-width: 430px;
-        margin: 70px auto;
-        background: rgba(255, 255, 255, 0.95);
-        padding: 35px 30px;
-        border-radius: 15px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-        animation: fadeIn 0.7s ease-out;
+        width: 100%;
+        max-width: 460px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96));
+        color: #111827;
+        padding: 36px 28px;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(2,6,23,0.45);
+        border: 1px solid rgba(255,255,255,0.6);
+        transform: translateY(-10px);
+    }
+
+    /* Centered header text */
+    .login-header {
+        text-align: center;
+        margin-bottom: 20px;
     }
 
     .login-title {
-        text-align: center;
-        font-size: 32px;
+        font-size: 26px;
         font-weight: 800;
-        margin-bottom: 25px;
-        color: #2a2a2a;
+        margin: 0;
+        color: #0b1220;
+    }
+
+    .login-sub {
+        margin-top: 4px;
+        font-size: 0.9rem;
+        color: #475569;
+    }
+
+    /* Form */
+    form#account {
+        margin-top: 12px;
+    }
+
+    .form-floating > label {
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #e6eef8;
+        padding: 12px 12px;
+        background: #fff;
+        color: #0b1220;
+    }
+
+    .form-check-input {
+        width: 18px;
+        height: 18px;
     }
 
     .btn-login {
-        background-color: #3A8DFF;
-        border: none;
-        padding: 12px;
-        border-radius: 8px;
-        font-size: 17px;
-        font-weight: 600;
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 800;
+        border: 0;
+        background: linear-gradient(90deg,#0f172a 0%, #111827 100%);
+        color: #fff;
+        box-shadow: 0 8px 22px rgba(2,6,23,0.28);
+        transition: transform .12s ease, box-shadow .12s ease;
     }
 
         .btn-login:hover {
-            background-color: #1f75ff;
+            transform: translateY(-2px);
+            box-shadow: 0 14px 34px rgba(2,6,23,0.34);
         }
 
-    .form-floating > label {
-        font-weight: 500;
+    .alt-links {
+        text-align: center;
+        margin-top: 14px;
+        font-size: 0.95rem;
     }
 
-    a {
-        color: #1366d6;
-    }
-
-        a:hover {
-            color: #004aad;
+        .alt-links a {
+            color: #0f172a;
+            font-weight: 600;
             text-decoration: none;
         }
 
-    @@keyframes fadeIn {
-        from
+            .alt-links a:hover {
+                text-decoration: underline;
+            }
+
+    @@media (max-width: 575.98px) {
+        .login-container
 
     {
-        opacity: 0;
-        transform: translateY(15px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
+        padding: 24px;
     }
 
     }
 </style>
 
-<div class="login-container">
-    <h2 class="login-title">Login</h2>
+<div class="login-wrapper" role="main">
+    <div class="login-container">
 
-    <form id="account" method="post">
-        <div asp-validation-summary="ModelOnly" class="text-danger text-center mb-2" role="alert"></div>
-
-        <div class="form-floating mb-3">
-            <input asp-for="Input.Email" class="form-control" placeholder="name@example.com" autocomplete="username" />
-            <label asp-for="Input.Email">Email</label>
-            <span asp-validation-for="Input.Email" class="text-danger"></span>
+        <!-- Centered title section -->
+        <div class="login-header">
+            <h2 class="login-title">Welcome back</h2>
+            <p class="login-sub">Sign in to continue to Bookify</p>
         </div>
 
-        <div class="form-floating mb-3">
-            <input asp-for="Input.Password" class="form-control" placeholder="password" autocomplete="current-password" />
-            <label asp-for="Input.Password">Password</label>
-            <span asp-validation-for="Input.Password" class="text-danger"></span>
-        </div>
+        <form id="account" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger text-center mb-2" role="alert"></div>
 
-        <div class="form-check mb-4">
-            <input class="form-check-input" asp-for="Input.RememberMe" />
-            <label class="form-check-label" asp-for="Input.RememberMe">
-                @Html.DisplayNameFor(m => m.Input.RememberMe)
-            </label>
-        </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Email" class="form-control" placeholder="name@example.com" autocomplete="username" />
+                <label asp-for="Input.Email">Email</label>
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
 
-        <button id="login-submit" type="submit" class="w-100 btn btn-login text-white">
-            Log In
-        </button>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Password" class="form-control" placeholder="password" autocomplete="current-password" />
+                <label asp-for="Input.Password">Password</label>
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
 
-        <div class="mt-4 text-center">
-            <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Create a new account</a><br />
-        </div>
-    </form>
+            <div class="form-check mb-4 d-flex align-items-center">
+                <input class="form-check-input me-2" asp-for="Input.RememberMe" />
+                <label class="form-check-label" asp-for="Input.RememberMe">
+                    @Html.DisplayNameFor(m => m.Input.RememberMe)
+                </label>
+            </div>
+
+            <button id="login-submit" type="submit" class="btn-login">
+                Log In
+            </button>
+
+            <div class="alt-links">
+                <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Create a new account</a>
+            </div>
+
+        </form>
+    </div>
 </div>
 
 @section Scripts {

@@ -5,136 +5,235 @@
 }
 
 <style>
+    /* Background now applies ONLY to the content area, NOT the navbar */
+    .room-details-wrapper {
+        min-height: 100vh;
+        background: #0f172a; /* solid dark blue */
+        padding-top: 40px;
+        padding-bottom: 40px;
+        color: #e6eef8;
+    }
+
+    .page-container {
+        max-width: 1150px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
     .room-header {
-        font-size: 2rem;
-        font-weight: 800;
-        margin-bottom: 25px;
-        color: #222;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+    }
+
+    .room-title {
+        font-size: 1.9rem;
+        font-weight: 900;
+        margin: 0;
+        color: #ffffff;
+    }
+
+    .room-sub {
+        color: rgba(255,255,255,0.75);
+        margin-top: 6px;
+        font-weight: 600;
     }
 
     .carousel-img {
-        height: 400px;
+        height: 430px;
         width: 100%;
         object-fit: cover;
         border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.4);
     }
 
     .info-box {
-        background: #fff;
-        padding: 25px;
-        border-radius: 14px;
-        border: 1px solid #e1e1e1;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+        background: rgba(255,255,255,0.03);
+        padding: 24px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+        color: #e6eef8;
     }
 
+        .info-box hr {
+            border: none;
+            height: 1px;
+            background: rgba(255,255,255,0.08);
+            margin: 12px 0;
+        }
+
+    .meta-row p {
+        margin: 6px 0;
+        color: rgba(255,255,255,0.9);
+    }
+
+    .status-badge {
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.75rem; /* smaller text */
+        display: inline-block;
+    }
+
+    .status-available {
+        background: #28a745;
+        color: white;
+    }
+
+    .status-booked {
+        background: #ffc107;
+        color: #212529;
+    }
+
+
     .btn-main, .btn-cart, .btn-back {
-        padding: 14px 20px;
-        font-size: 1.1rem;
+        padding: 12px 18px;
+        font-size: 1rem;
         font-weight: 700;
         border-radius: 10px;
         width: 100%;
     }
 
+    .btn-main {
+        background: #3A8DFF;
+        border: none;
+        color: white;
+    }
+
     .btn-cart {
         background: #17a2b8;
         color: white;
+        border: none;
     }
 
     .btn-back {
         background: #6c757d;
         color: white;
+        border: none;
+    }
+
+    /* small responsive tweaks */
+    @@media (max-width: 991.98px) {
+        .carousel-img
+
+    {
+        height: 300px;
+    }
+
     }
 </style>
 
-<h2 class="room-header">Room @Model.RoomNum — @Model.RoomType?.RoomTypeName</h2>
+<body>
+    <div class="room-details-wrapper">
+        <div class="page-container">
 
-<div class="row">
-    <div class="col-md-7 mb-4">
-        <div id="carouselRoom" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
-
-                @if (!string.IsNullOrWhiteSpace(Model.Slide1))
-                {
-                    <div class="carousel-item active">
-                        <img src="@Model.Slide1" class="carousel-img" />
-                    </div>
-                }
-
-                @if (!string.IsNullOrWhiteSpace(Model.Slide2))
-                {
-                    <div class="carousel-item">
-                        <img src="@Model.Slide2" class="carousel-img" />
-                    </div>
-                }
-
-                @if (!string.IsNullOrWhiteSpace(Model.Slide3))
-                {
-                    <div class="carousel-item">
-                        <img src="@Model.Slide3" class="carousel-img" />
-                    </div>
-                }
-
-            </div>
-
-            <button class="carousel-control-prev" type="button" data-bs-target="#carouselRoom" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon"></span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#carouselRoom" data-bs-slide="next">
-                <span class="carousel-control-next-icon"></span>
-            </button>
-        </div>
-    </div>
-
-    <div class="col-md-5">
-        <div class="info-box">
-
-            <h4>Description</h4>
-            <p>@Model.Description</p>
-
-            <p><strong>Type:</strong> @Model.RoomType?.RoomTypeName</p>
-            <p><strong>Price:</strong> @Model.RoomType?.Price EGP</p>
-            <p><strong>People:</strong> @Model.RoomType?.NumOfPeople</p>
-
-            <p>
-                <strong>Availability (today):</strong>
-                <span class="badge @(isBookedToday ? "bg-warning text-dark" : "bg-success")">
-                    @(isBookedToday ? "Booked Today" : "Available")
-                </span>
-            </p>
-
-            <hr />
-
-            <!-- Date pickers -->
-            <div class="row mb-3">
-                <div class="col">
-                    <label class="form-label">From</label>
-                    <input id="checkIn" type="date" class="form-control" />
+            <div class="room-header">
+                <div>
+                    <h1 class="room-title">Room @Model.RoomNum</h1>
+                    <div class="room-sub">@Model.RoomType?.RoomTypeName — <span style="font-weight:700;">@Model.RoomType?.Price EGP</span></div>
                 </div>
-                <div class="col">
-                    <label class="form-label">To</label>
-                    <input id="checkOut" type="date" class="form-control" />
+
+                <!-- (removed: Booked Today / People from here as requested) -->
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <div id="carouselRoom" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            @if (!string.IsNullOrWhiteSpace(Model.Slide1))
+                            {
+                                <div class="carousel-item active">
+                                    <img src="@Model.Slide1" class="carousel-img" />
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(Model.Slide2))
+                            {
+                                <div class="carousel-item">
+                                    <img src="@Model.Slide2" class="carousel-img" />
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(Model.Slide3))
+                            {
+                                <div class="carousel-item">
+                                    <img src="@Model.Slide3" class="carousel-img" />
+                                </div>
+                            }
+                        </div>
+
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselRoom" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselRoom" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="info-box">
+                        <h4>Description</h4>
+                        <p class="mb-3">@Model.Description</p>
+
+                        <div class="meta-row mb-3">
+                            <p><strong>Type:</strong> @Model.RoomType?.RoomTypeName</p>
+                            <p><strong>Price:</strong> @Model.RoomType?.Price EGP</p>
+                            <p><strong>People:</strong> @Model.RoomType?.NumOfPeople</p>
+
+                            <!-- New Status line under People -->
+                            <p>
+                                <strong>Status:</strong>
+                                @if (isBookedToday)
+                                {
+                                    <span class="status-badge status-booked">Booked Today</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge status-available">Available</span>
+                                }
+                            </p>
+                        </div>
+
+                        <hr style="border-color: rgba(255,255,255,0.04);" />
+
+                        <!-- Date pickers -->
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label class="form-label text-muted">From</label>
+                                <input id="checkIn" type="date" class="form-control" />
+                            </div>
+                            <div class="col">
+                                <label class="form-label text-muted">To</label>
+                                <input id="checkOut" type="date" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="mt-3 d-flex flex-column gap-2">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <a id="bookNowBtn" href="#" class="btn btn-main">Book Now</a>
+                                <a id="addCartBtn" href="#" class="btn btn-cart">Add to Cart</a>
+                            }
+                            else
+                            {
+                                <a href="/Identity/Account/Login" class="btn btn-main">Login to Book</a>
+                            }
+
+                            <a href="/Customer/Room" class="btn btn-back">Back to Rooms</a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="mt-4 d-flex flex-column gap-3">
-                @if (User.Identity.IsAuthenticated)
-                {
-                    <a id="bookNowBtn" href="#" class="btn btn-dark btn-main">Book Now</a>
-                    <a id="addCartBtn" href="#" class="btn btn-cart">Add to Cart</a>
-                }
-                else
-                {
-                    <a href="/Identity/Account/Login" class="btn btn-primary btn-main">
-                        Login to Book
-                    </a>
-                }
-
-                <a href="/Customer/Room" class="btn btn-back">Back to Rooms</a>
-            </div>
-
-        </div>
-    </div>
-</div>
+        </div> <!-- page-container -->
+    </div> <!-- room-details-wrapper -->
+</body>
 
 @section Scripts {
     <script>
@@ -145,8 +244,8 @@
             const ci = document.getElementById("checkIn");
             const co = document.getElementById("checkOut");
 
-            ci.min = today;
-            co.min = today;
+            if (ci) ci.min = today;
+            if (co) co.min = today;
 
             function enforceDates() {
                 if (!ci.value) return;
@@ -173,7 +272,7 @@
             const addBtn = document.getElementById('addCartBtn');
 
             function validDates() {
-                return ci.value && co.value && new Date(co.value) > new Date(ci.value);
+                return ci && co && ci.value && co.value && new Date(co.value) > new Date(ci.value);
             }
 
             bookBtn?.addEventListener('click', function (e) {

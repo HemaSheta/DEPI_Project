@@ -5,121 +5,186 @@
 }
 
 <style>
+    /* Page background */
     body {
-        background: linear-gradient(135deg, #3A8DFF, #6CC3FF);
-        background-attachment: fixed;
-        font-family: 'Segoe UI', sans-serif;
+        margin: 0;
+        font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+        background: radial-gradient(circle at 10% 20%, rgba(58,141,255,0.08), transparent 10%), radial-gradient(circle at 90% 80%, rgba(108,195,255,0.06), transparent 12%), linear-gradient(135deg, #0f172a 0%, #0b2540 50%, #06304a 100%);
+        color: #e6eef8;
     }
 
+    /* wrapper below navbar */
+    .register-wrapper {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 16px;
+        box-sizing: border-box;
+    }
+
+    /* Register container */
     .register-container {
-        max-width: 430px;
-        margin: 60px auto;
-        background: rgba(255, 255, 255, 0.95);
-        padding: 35px 30px;
-        border-radius: 15px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-        animation: fadeIn 0.7s ease-out;
+        width: 100%;
+        max-width: 520px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96));
+        color: #111827;
+        padding: 34px 30px;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(2,6,23,0.45);
+        border: 1px solid rgba(255,255,255,0.6);
+        transform: translateY(-8px);
+    }
+
+    .register-header {
+        text-align: center;
+        margin-bottom: 18px;
     }
 
     .register-title {
-        text-align: center;
-        font-size: 32px;
+        font-size: 24px;
         font-weight: 800;
-        margin-bottom: 25px;
-        color: #2a2a2a;
+        margin: 0;
+        color: #0b1220;
+    }
+
+    .register-sub {
+        margin-top: 6px;
+        font-size: 0.92rem;
+        color: #475569;
+    }
+
+    /* Form */
+    form#registerForm {
+        margin-top: 12px;
+    }
+
+    .form-floating > label {
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #e6eef8;
+        padding: 12px 12px;
+        background: #fff;
+        color: #0b1220;
+    }
+
+    .row-gap {
+        gap: 12px;
     }
 
     .btn-register {
-        background-color: #3A8DFF;
-        border: none;
-        padding: 12px;
-        border-radius: 8px;
-        font-size: 17px;
-        font-weight: 600;
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 800;
+        border: 0;
+        background: linear-gradient(90deg,#3A8DFF 0%, #6CC3FF 100%);
+        color: #fff;
+        box-shadow: 0 8px 22px rgba(58,141,255,0.22);
+        transition: transform .12s ease, box-shadow .12s ease;
     }
 
         .btn-register:hover {
-            background-color: #1f75ff;
+            transform: translateY(-2px);
+            box-shadow: 0 14px 34px rgba(58,141,255,0.28);
         }
 
-    .form-floating > label {
-        font-weight: 500;
+    .alt-links {
+        text-align: center;
+        margin-top: 14px;
+        font-size: 0.95rem;
     }
 
-    a {
-        color: #1366d6;
-    }
-
-        a:hover {
-            color: #004aad;
+        .alt-links a {
+            color: #0f172a;
+            font-weight: 600;
             text-decoration: none;
         }
 
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(15px);
-        }
+            .alt-links a:hover {
+                text-decoration: underline;
+            }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .validation-summary-valid, .validation-summary-errors {
+        margin-bottom: 10px;
+    }
+
+    @@media (max-width: 575.98px) {
+        .register-container
+
+    {
+        padding: 20px;
+    }
+
     }
 </style>
 
-<div class="register-container">
-    <h2 class="register-title">Create Account</h2>
-
-    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-        <div asp-validation-summary="ModelOnly" class="text-danger text-center mb-2" role="alert"></div>
-
-        <div class="form-floating mb-3">
-            <input asp-for="Input.Email" class="form-control" placeholder="name@gmail.com" autocomplete="username" />
-            <label asp-for="Input.Email">Email</label>
-            <span asp-validation-for="Input.Email" class="text-danger"></span>
+<div class="register-wrapper" role="main">
+    <div class="register-container">
+        <div class="register-header">
+            <h2 class="register-title">Create Account</h2>
+            <p class="register-sub">Sign up to reserve rooms and manage your bookings</p>
         </div>
 
-        <div class="form-floating mb-3">
-            <input asp-for="Input.Password" class="form-control" placeholder="password" autocomplete="new-password" />
-            <label asp-for="Input.Password">Password</label>
-            <span asp-validation-for="Input.Password" class="text-danger"></span>
-        </div>
+        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger text-center mb-2" role="alert"></div>
 
-        <div class="form-floating mb-3">
-            <input asp-for="Input.ConfirmPassword" class="form-control" placeholder="confirm password" autocomplete="new-password" />
-            <label asp-for="Input.ConfirmPassword">Confirm Password</label>
-            <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-        </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Email" class="form-control" placeholder="name@gmail.com" autocomplete="username" />
+                <label asp-for="Input.Email">Email</label>
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
 
-        <hr />
+            <div class="row row-gap mb-3">
+                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                    <div class="form-floating">
+                        <input asp-for="Input.FirstName" class="form-control" placeholder="First name" />
+                        <label asp-for="Input.FirstName">First name</label>
+                        <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+                    </div>
+                </div>
 
-        <div class="form-floating mb-3">
-            <input asp-for="Input.FirstName" class="form-control" placeholder="First name" />
-            <label asp-for="Input.FirstName">First name</label>
-            <span asp-validation-for="Input.FirstName" class="text-danger"></span>
-        </div>
+                <div class="col-12 col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="Input.LastName" class="form-control" placeholder="Last name" />
+                        <label asp-for="Input.LastName">Last name</label>
+                        <span asp-validation-for="Input.LastName" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
 
-        <div class="form-floating mb-3">
-            <input asp-for="Input.LastName" class="form-control" placeholder="Last name" />
-            <label asp-for="Input.LastName">Last name</label>
-            <span asp-validation-for="Input.LastName" class="text-danger"></span>
-        </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Phone" class="form-control" placeholder="Phone" />
+                <label asp-for="Input.Phone">Phone</label>
+                <span asp-validation-for="Input.Phone" class="text-danger"></span>
+            </div>
 
-        <div class="form-floating mb-3">
-            <input asp-for="Input.Phone" class="form-control" placeholder="Phone" />
-            <label asp-for="Input.Phone">Phone</label>
-            <span asp-validation-for="Input.Phone" class="text-danger"></span>
-        </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Password" class="form-control" placeholder="password" autocomplete="new-password" />
+                <label asp-for="Input.Password">Password</label>
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
 
-        <button id="registerSubmit" type="submit" class="w-100 btn btn-register text-white">
-            Register
-        </button>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.ConfirmPassword" class="form-control" placeholder="confirm password" autocomplete="new-password" />
+                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            </div>
 
-        <div class="mt-4 text-center">
-            <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Already have an account? Login</a>
-        </div>
-    </form>
+            <button id="registerSubmit" type="submit" class="btn-register">
+                Register
+            </button>
+
+            <div class="mt-4 text-center alt-links">
+                <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Already have an account? Login</a>
+            </div>
+        </form>
+    </div>
 </div>
 
 @section Scripts {
