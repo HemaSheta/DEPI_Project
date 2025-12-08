@@ -56,18 +56,15 @@
         }
 
     @@keyframes fadeIn {
-        from
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
 
-    {
-        opacity: 0;
-        transform: translateY(15px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 
@@ -93,6 +90,26 @@
             <input asp-for="Input.ConfirmPassword" class="form-control" placeholder="confirm password" autocomplete="new-password" />
             <label asp-for="Input.ConfirmPassword">Confirm Password</label>
             <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+        </div>
+
+        <hr />
+
+        <div class="form-floating mb-3">
+            <input asp-for="Input.FirstName" class="form-control" placeholder="First name" />
+            <label asp-for="Input.FirstName">First name</label>
+            <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="Input.LastName" class="form-control" placeholder="Last name" />
+            <label asp-for="Input.LastName">Last name</label>
+            <span asp-validation-for="Input.LastName" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="Input.Phone" class="form-control" placeholder="Phone" />
+            <label asp-for="Input.Phone">Phone</label>
+            <span asp-validation-for="Input.Phone" class="text-danger"></span>
         </div>
 
         <button id="registerSubmit" type="submit" class="w-100 btn btn-register text-white">

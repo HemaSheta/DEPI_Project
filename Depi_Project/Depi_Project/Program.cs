@@ -4,10 +4,8 @@ using Depi_Project.Data.Repository.Interfaces;
 using Depi_Project.Data.UnitOfWork;
 using Depi_Project.Services.Interfaces;
 using Depi_Project.Services.Implementations;
-using Depi_Project.Controllers.Customer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Stripe;
 
 namespace Depi_Project
 {
@@ -17,16 +15,11 @@ namespace Depi_Project
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Stripe Settings
-            var stripeSettings = builder.Configuration.GetSection("Stripe");
-            builder.Services.Configure<StripeSettings>(stripeSettings);
-            StripeConfiguration.ApiKey = stripeSettings["SecretKey"];
-
-            // Database
+            // --- Database ---
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Identity
+            // --- Identity ---
             builder.Services.AddDefaultIdentity<IdentityUser>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
@@ -43,7 +36,7 @@ namespace Depi_Project
                 options.AccessDeniedPath = "/Identity/Account/AccessDenied";
             });
 
-            // ---- SESSION (Required for Cart) ----
+            // --- SESSION (Required for Cart) ---
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
@@ -52,32 +45,22 @@ namespace Depi_Project
                 options.Cookie.IsEssential = true;
             });
 
-            // Repositories
+            // --- Repositories / UnitOfWork ---
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            // Services
+            // --- Services ---
             builder.Services.AddScoped<IRoomService, RoomService>();
             builder.Services.AddScoped<IRoomTypeService, RoomTypeService>();
             builder.Services.AddScoped<IBookingService, BookingService>();
             builder.Services.AddScoped<IUserProfileService, UserProfileService>();
-            builder.Services.AddSession();
 
             builder.Services.AddRazorPages();
             builder.Services.AddControllersWithViews();
-            // add session support
-            builder.Services.AddDistributedMemoryCache();
-            builder.Services.AddSession(options =>
-            {
-                options.IdleTimeout = TimeSpan.FromMinutes(60);
-                options.Cookie.HttpOnly = true;
-                options.Cookie.IsEssential = true;
-            });
-
 
             var app = builder.Build();
 
-            // Middlewares
+            // --- Pipeline ---
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -86,11 +69,9 @@ namespace Depi_Project
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseSession();
 
+            // Session must be before Authentication
             app.UseRouting();
-
-            // ⭐ SESSION MUST COME BEFORE AUTH
             app.UseSession();
 
             app.UseAuthentication();
@@ -99,46 +80,40 @@ namespace Depi_Project
             app.MapRazorPages();
             app.MapControllers();
 
-            app.MapPost("/stripe/webhook", StripeWebhookHandler.HandleWebhook);
-
-            // Admin Route
+            // Admin route
             app.MapControllerRoute(
                 name: "admin",
                 pattern: "Admin/{controller=RoomType}/{action=Index}/{id?}");
 
-            // Default Route
+            // Default route
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            // SEED ADMIN
+            // --- SEED ADMIN USER (NO ROLES) ---
             using (var scope = app.Services.CreateScope())
             {
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
                 string adminEmail = "hemasheta061@gmail.com";
                 string adminPassword = "Password123";
 
-                var admin = await userManager.FindByEmailAsync(adminEmail);
-                if (admin == null)
+                var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+                if (adminUser == null)
                 {
-                    admin = new IdentityUser
+                    adminUser = new IdentityUser
                     {
                         UserName = adminEmail,
                         Email = adminEmail,
                         EmailConfirmed = true
                     };
-                    await userManager.CreateAsync(admin, adminPassword);
+
+                    await userManager.CreateAsync(adminUser, adminPassword);
                 }
             }
 
             app.Run();
         }
-    }
-
-    public class StripeSettings
-    {
-        public string PublishableKey { get; set; }
-        public string SecretKey { get; set; }
-        public string WebhookSecret { get; set; }
     }
 }

@@ -1,12 +1,11 @@
 ﻿using Depi_Project.Helpers;
 using Depi_Project.Models;
 using Depi_Project.Services.Interfaces;
+using Depi_Project.Data.UnitOfWork;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Stripe;
-using Stripe.Checkout;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Depi_Project.Controllers.Customer
 {
@@ -15,205 +14,138 @@ namespace Depi_Project.Controllers.Customer
     public class PaymentsController : Controller
     {
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly StripeSettings _stripeSettings;
         private readonly IBookingService _bookingService;
+        private readonly IUnitOfWork _unitOfWork;
+
+        // session cart key must match your cart controller
+        private const string SESSION_CART_KEY = "reservation_cart_v1";
 
         public PaymentsController(
             UserManager<IdentityUser> userManager,
-            IOptions<StripeSettings> stripeOptions,
-            IBookingService bookingService)
+            IBookingService bookingService,
+            IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
-            _stripeSettings = stripeOptions.Value;
             _bookingService = bookingService;
+            _unitOfWork = unitOfWork;
         }
 
-        // ===========================
-        //   CART CHECKOUT (Stripe)
-        // ===========================
+        // GET: /Customer/Payments/CheckoutFromCart
+        // This will create bookings (PaymentStatus = Not Paid), clear the cart and return JSON (AJAX) with redirect url.
         [HttpGet]
-        public IActionResult CheckoutFromCart()
+        public async Task<IActionResult> CheckoutFromCart()
         {
-            var cart = HttpContext.Session.GetObject<List<CartItem>>("reservation_cart_v1")
-                       ?? new List<CartItem>();
-
-            if (!cart.Any())
+            try
             {
-                TempData["Error"] = "Your cart is empty.";
-                return Redirect("/Customer/Cart");
-            }
-
-            // 1) Validate cart items: no overlapping between items (customer rule)
-            for (int i = 0; i < cart.Count; i++)
-            {
-                for (int j = i + 1; j < cart.Count; j++)
+                var cart = HttpContext.Session.GetObject<List<CartItem>>(SESSION_CART_KEY) ?? new List<CartItem>();
+                if (!cart.Any())
                 {
-                    var a = cart[i];
-                    var b = cart[j];
+                    return Json(new { error = "CartEmpty", message = "Your cart is empty." });
+                }
 
-                    bool overlap = a.CheckIn < b.CheckOut && a.CheckOut > b.CheckIn;
-                    if (overlap)
+                // 1) Validate cart internal overlap (customer rule: cannot book multiple overlapping items)
+                for (int i = 0; i < cart.Count; i++)
+                {
+                    for (int j = i + 1; j < cart.Count; j++)
                     {
-                        TempData["Error"] = "Cart contains two items that overlap in dates. You cannot book multiple rooms for overlapping dates.";
-                        return Redirect("/Customer/Cart");
+                        var a = cart[i];
+                        var b = cart[j];
+                        bool overlap = a.CheckIn < b.CheckOut && a.CheckOut > b.CheckIn;
+                        if (overlap)
+                        {
+                            return Json(new { error = "OverlapInCart", message = "Cart contains two items that overlap in dates. Remove one." });
+                        }
                     }
                 }
-            }
 
-            // 2) Validate availability for each cart item against existing bookings
-            foreach (var c in cart)
-            {
-                if (!_bookingService.IsRoomAvailable(c.RoomId, c.CheckIn, c.CheckOut))
-                {
-                    TempData["Error"] = $"Room #{c.RoomNum} is no longer available for the selected dates.";
-                    return Redirect("/Customer/Cart");
-                }
-            }
-
-            // 3) Validate that the user doesn't have existing bookings overlapping any cart item
-            var identityId = _userManager.GetUserId(User);
-            if (!string.IsNullOrEmpty(identityId))
-            {
+                // 2) Validate availability against current bookings in DB
                 foreach (var c in cart)
                 {
-                    var userBookings = _bookingService.GetAllBookings()
-                        .Where(b => b.IdentityUserId == identityId);
+                    if (!_bookingService.IsRoomAvailable(c.RoomId, c.CheckIn, c.CheckOut))
+                    {
+                        return Json(new { error = "RoomUnavailable", message = $"Room #{c.RoomNum} is no longer available for the selected dates." });
+                    }
+                }
 
+                // 3) Validate user doesn't have conflicting booking
+                var identityId = _userManager.GetUserId(User);
+                if (string.IsNullOrEmpty(identityId))
+                    return Json(new { error = "NotAuthenticated", message = "Could not determine logged-in user. Please re-login." });
+
+                var userBookings = _bookingService.GetAllBookings()
+                    .Where(b => b.IdentityUserId == identityId)
+                    .ToList();
+
+                foreach (var c in cart)
+                {
                     foreach (var ub in userBookings)
                     {
                         bool overlap = c.CheckIn < ub.CheckOutTime && c.CheckOut > ub.CheckTime;
                         if (overlap)
                         {
-                            TempData["Error"] = "You already have a booking that overlaps one of the cart items. Please remove the conflicting item.";
-                            return Redirect("/Customer/Cart");
+                            return Json(new { error = "UserOverlap", message = "You already have a booking that overlaps one of the cart items. Remove the conflicting item." });
                         }
                     }
                 }
-            }
 
-            // Passed validation -> create Stripe Session
-            StripeConfiguration.ApiKey = _stripeSettings.SecretKey;
-            var domain = $"{Request.Scheme}://{Request.Host}";
-
-            // Metadata (compact)
-            var metadata = new Dictionary<string, string>
-            {
-                { "CartCount", cart.Count.ToString() },
-                { "IdentityUserId", identityId ?? "" }
-            };
-
-            for (int i = 0; i < cart.Count; i++)
-            {
-                var c = cart[i];
-                metadata[$"item_{i}"] = $"{c.RoomId}|{c.CheckIn:yyyy-MM-dd}|{c.CheckOut:yyyy-MM-dd}|{c.PricePerNight}";
-            }
-
-            var lineItems = cart.Select(c =>
-            {
-                int nights = (c.CheckOut.Date - c.CheckIn.Date).Days;
-                if (nights <= 0) nights = 1;
-                return new SessionLineItemOptions
+                // Fetch identity user entity (important: assign both FK and navigation)
+                var identityUser = await _userManager.FindByIdAsync(identityId);
+                if (identityUser == null)
                 {
-                    Quantity = 1,
-                    PriceData = new SessionLineItemPriceDataOptions
-                    {
-                        Currency = "usd",
-                        UnitAmount = (long)(c.PricePerNight * nights * 100),
-                        ProductData = new SessionLineItemPriceDataProductDataOptions
-                        {
-                            Name = $"Room {c.RoomNum} - {c.RoomTitle}",
-                            Description = $"{nights} nights ({c.CheckIn:yyyy-MM-dd} to {c.CheckOut:yyyy-MM-dd})"
-                        }
-                    }
-                };
-            }).ToList();
+                    return Json(new { error = "NotFoundUser", message = "Logged-in user not found." });
+                }
 
-            var options = new SessionCreateOptions
-            {
-                PaymentMethodTypes = new List<string> { "card" },
-                LineItems = lineItems,
-                Mode = "payment",
-                SuccessUrl = domain + "/Customer/Cart/Success",
-                CancelUrl = domain + "/Customer/Cart",
-                Metadata = metadata
-            };
-
-            var service = new SessionService();
-            var session = service.Create(options);
-
-            // Return session id and url (front-end can redirect)
-            return Json(new { id = session.Id, url = session.Url });
-        }
-
-
-        // ===============================
-        //   DIRECT ROOM CHECKOUT (OLD)
-        // ===============================
-        [HttpPost]
-        public async Task<IActionResult> CreateCheckoutSession([FromBody] CheckoutRequest request)
-        {
-            if (request.totalPrice <= 0 ||
-                string.IsNullOrWhiteSpace(request.checkIn) ||
-                string.IsNullOrWhiteSpace(request.checkOut))
-            {
-                return BadRequest(new { error = "Invalid booking details." });
-            }
-
-            var identityUserId = _userManager.GetUserId(User);
-
-            StripeConfiguration.ApiKey = _stripeSettings.SecretKey;
-            var domain = $"{Request.Scheme}://{Request.Host}";
-
-            var options = new SessionCreateOptions
-            {
-                PaymentMethodTypes = new List<string> { "card" },
-
-                LineItems = new List<SessionLineItemOptions>
+                // 4) All validations passed -> create bookings inside a transaction
+                using (var tx = _unitOfWork.BeginTransaction())
                 {
-                    new SessionLineItemOptions
+                    try
                     {
-                        Quantity = 1,
-                        PriceData = new SessionLineItemPriceDataOptions
+                        foreach (var item in cart)
                         {
-                            Currency = "usd",
-                            UnitAmount = (long)(request.totalPrice * 100),
-                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            var booking = new Booking
                             {
-                                Name = "Room Booking",
-                                Description = $"Room ID: {request.roomId}"
+                                RoomId = item.RoomId,
+                                IdentityUserId = identityId,     // set FK explicitly
+                                IdentityUser = identityUser,     // set navigation object too (ensures EF tracks relationship)
+                                CheckTime = item.CheckIn,
+                                CheckOutTime = item.CheckOut,
+                                TotalPrice = item.TotalPrice,
+                                PaymentStatus = "Not Paid"
+                            };
+
+                            // Validate business rules again for this constructed booking
+                            if (!_bookingService.ValidateBooking(booking, out string error))
+                            {
+                                tx.Rollback();
+                                return Json(new { error = "ValidationFailed", message = error });
                             }
+
+                            // Add booking to UoW
+                            _unitOfWork.Bookings.Add(booking);
                         }
+
+                        // Save + commit
+                        _unitOfWork.Save();
+                        tx.Commit();
                     }
-                },
-
-                Mode = "payment",
-
-                SuccessUrl = $"{domain}/Customer/Booking/Success",
-                CancelUrl = $"{domain}/Customer/Room/Details/{request.roomId}",
-
-                Metadata = new Dictionary<string, string>
-                {
-                    { "RoomId", request.roomId.ToString() },
-                    { "IdentityUserId", identityUserId },
-                    { "CheckIn", request.checkIn },
-                    { "CheckOut", request.checkOut },
-                    { "TotalPrice", request.totalPrice.ToString() }
+                    catch (Exception exTx)
+                    {
+                        try { tx.Rollback(); } catch { }
+                        return Json(new { error = "ServerError", message = $"Server error while creating Bookings. {exTx.Message}" });
+                    }
                 }
-            };
 
-            var service = new SessionService();
-            Session session = await service.CreateAsync(options);
+                // 5) Clear cart
+                HttpContext.Session.Remove(SESSION_CART_KEY);
 
-            return Json(new { id = session.Id });
+                // Return success JSON with redirect url to Success page (client will redirect)
+                var successUrl = Url.Action("Success", "Cart", new { area = "" }) ?? "/Customer/Cart/Success";
+                return Json(new { url = successUrl });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = "ServerError", message = $"Server error while creating Bookings. {ex.Message}" });
+            }
         }
-    }
-
-    // Helper class to read POST JSON
-    public class CheckoutRequest
-    {
-        public int roomId { get; set; }
-        public string checkIn { get; set; }
-        public string checkOut { get; set; }
-        public float totalPrice { get; set; }
     }
 }

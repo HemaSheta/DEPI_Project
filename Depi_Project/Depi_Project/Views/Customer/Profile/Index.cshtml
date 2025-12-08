@@ -19,11 +19,21 @@
                         </div>
 
                         <div class="col-md-8">
-                            <p class="mb-1"><strong>Email:</strong> @Model.Profile?.IdentityUser?.Email ?? "—"</p>
-                            <p class="mb-1"><strong>IdentityUserId:</strong> @Model.Profile?.IdentityUserId</p>
+                            @* Email: prefer Identity navigation if present, else fallback to ProfileViewModel.Profile.IdentityUserId lookup *@
+                            @{
+                                var email = Model.Profile?.IdentityUser?.Email;
+                                // if not available try to load from IdentityId (controller already attached IdentityUser).
+                                if (string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(Model.Profile?.IdentityUserId))
+                                {
+                                    // controller attaches IdentityUser when possible, so this is a fallback.
+                                    email = Model.Profile?.IdentityUser?.Email ?? "—";
+                                }
+                                var phone = Model.Profile?.Phone ?? "—";
+                            }
 
-                            @* Optional fields if you add them later (phone, name) *@
-                            @* <p class="mb-1"><strong>Phone:</strong> @Model.Profile?.Phone</p> *@
+                            <p class="mb-1"><strong>Email:</strong> @email</p>
+                            <p class="mb-1"><strong>Phone:</strong> @phone</p>
+                            <p class="mb-1"><strong>IdentityUserId:</strong> @Model.Profile?.IdentityUserId</p>
 
                             <div class="mt-3">
                                 <a href="/Customer/Profile/Edit" class="btn btn-outline-primary btn-sm">Edit Profile</a>
@@ -66,7 +76,6 @@
                             <th>Check-Out</th>
                             <th>Total</th>
                             <th>Payment</th>
-                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -96,9 +105,6 @@
                                     {
                                         <span class="badge bg-warning text-dark">Pending</span>
                                     }
-                                </td>
-                                <td>
-                                    <a class="btn btn-sm btn-outline-primary" href="/Customer/Booking/Details/@b.BookingId">Details</a>
                                 </td>
                             </tr>
                         }

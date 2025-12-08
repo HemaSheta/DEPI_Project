@@ -1,0 +1,26 @@
+﻿@model Depi_Project.Models.Booking
+@{
+    ViewData["Title"] = "Edit Payment Status";
+}
+
+<div class="container py-4" style="max-width:700px;">
+    <h2 class="mb-3">Edit Payment — Booking #@Model.BookingId</h2>
+
+    <div class="card p-3">
+        <form method="post" asp-action="EditPaymentPost" asp-route-id="@Model.BookingId">
+            <div class="mb-3">
+                <label class="form-label">Payment Status</label>
+                <select name="paymentStatus" class="form-select">
+                    <option value="Not Paid" @@(Model.PaymentStatus == "Not Paid" ? "selected" : "")>Not Paid</option>
+                    <option value="Pending" @@(Model.PaymentStatus == "Pending" ? "selected" : "")>Pending</option>
+                    <option value="Paid" @@(Model.PaymentStatus == "Paid" ? "selected" : "")>Paid</option>
+                </select>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary" type="submit">Save</button>
+                <a class="btn btn-outline-secondary" href="/Admin/Booking">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

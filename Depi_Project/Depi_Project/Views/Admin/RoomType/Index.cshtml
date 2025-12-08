@@ -4,46 +4,94 @@
     ViewData["Title"] = "Room Types";
 }
 
-<div class="container mt-4" style="max-width: 1100px;">
+<style>
+    .admin-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding-top: 20px;
+        padding-bottom: 30px;
+    }
 
-    <h2 class="mb-4 text-center fw-bold" style="font-size: 2rem;">Room Types</h2>
+    .header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+    }
 
-    <div class="d-flex justify-content-end mb-3">
-        <a class="btn btn-primary" href="/Admin/RoomType/Create">+ Add New Room Type</a>
+    .page-title {
+        font-size: 1.6rem;
+        font-weight: 800;
+    }
+
+    .card-panel {
+        background: #ffffff;
+        padding: 18px;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    }
+
+    .admin-table {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    }
+
+    .muted-small {
+        color: #6c757d;
+        font-size: .9rem;
+    }
+
+    .btn-small {
+        padding: 6px 10px;
+        font-size: .85rem;
+    }
+</style>
+
+<div class="admin-container">
+    <div class="header-row">
+        <div class="page-title">Room Types</div>
+        <div>
+            <a class="btn btn-primary" href="/Admin/RoomType/Create">+ Add New Room Type</a>
+        </div>
     </div>
 
-    <div class="card shadow-sm p-3">
-
-        <table class="table table-hover table-bordered mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th>Name</th>
-                    <th>Price (EGP)</th>
-                    <th>People</th>
-                    <th style="width: 150px;">Actions</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                @foreach (var t in Model)
-                {
+    <div class="card-panel">
+        <div class="admin-table">
+            <table class="table table-hover table-bordered mb-0 align-middle text-center">
+                <thead class="table-dark">
                     <tr>
-                        <td>@t.RoomTypeName</td>
-                        <td>@t.Price</td>
-                        <td>@t.NumOfPeople</td>
-
-                        <td>
-                            <a href="/Admin/RoomType/Edit/@t.RoomTypeId"
-                               class="btn btn-warning btn-sm me-1">Edit</a>
-
-                            <a href="/Admin/RoomType/Delete/@t.RoomTypeId"
-                               class="btn btn-danger btn-sm">Delete</a>
-                        </td>
+                        <th>Name</th>
+                        <th>Price (EGP)</th>
+                        <th>People</th>
+                        <th style="width:150px;">Actions</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
 
+                <tbody>
+                    @foreach (var t in Model)
+                    {
+                        <tr>
+                            <td class="text-start">
+                                <div style="font-weight:700;">@t.RoomTypeName</div>
+                                <div class="muted-small">ID: @t.RoomTypeId</div>
+                            </td>
+
+                            <td>@t.Price</td>
+
+                            <td>@t.NumOfPeople</td>
+
+                            <td>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a href="/Admin/RoomType/Edit/@t.RoomTypeId" class="btn btn-warning btn-small">Edit</a>
+                                    <a href="/Admin/RoomType/Delete/@t.RoomTypeId" class="btn btn-danger btn-small">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
-
 </div>

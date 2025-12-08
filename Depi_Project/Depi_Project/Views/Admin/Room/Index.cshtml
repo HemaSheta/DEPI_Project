@@ -4,62 +4,172 @@
     ViewData["Title"] = "Rooms";
 }
 
-<div class="container mt-4" style="max-width: 1200px;">
+<style>
+    .admin-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding-top: 20px;
+        padding-bottom: 30px;
+    }
 
-    <h2 class="mb-4 text-center fw-bold" style="font-size: 2rem;">Rooms</h2>
+    .header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+    }
 
-    <div class="d-flex justify-content-end mb-3">
-        <a class="btn btn-primary" href="/Admin/Room/Create">+ Add New Room</a>
+    .page-title {
+        font-size: 1.6rem;
+        font-weight: 800;
+    }
+
+    .card-panel {
+        background: #ffffff;
+        padding: 18px;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    }
+
+    .admin-table {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    }
+
+    .thumb-img {
+        width: 120px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #e9e9e9;
+    }
+
+    .thumb-gallery {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .thumb-placeholder {
+        width: 120px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f6f6f6;
+        color: #999;
+        border-radius: 8px;
+        border: 1px dashed #e9e9e9;
+        font-size: 0.85rem;
+    }
+
+    .room-num {
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .muted-small {
+        color: #6c757d;
+        font-size: .9rem;
+    }
+
+    .btn-small {
+        padding: 6px 10px;
+        font-size: .85rem;
+    }
+</style>
+
+<div class="admin-container">
+    <div class="header-row">
+        <div class="page-title">Rooms</div>
+        <div>
+            <a class="btn btn-primary" href="/Admin/Room/Create">+ Add New Room</a>
+        </div>
     </div>
 
-    <div class="card shadow-sm p-3">
-
-        <table class="table table-hover table-bordered mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th>Room #</th>
-                    <th>Description</th>
-                    <th>Room Type</th>
-                    <th>Price</th>
-                    <th class="text-center">Slide 1</th>
-                    <th class="text-center">Slide 2</th>
-                    <th class="text-center">Slide 3</th>
-                    <th style="width: 160px;">Actions</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                @foreach (var room in Model)
-                {
+    <div class="card-panel">
+        <div class="admin-table">
+            <table class="table table-hover table-bordered mb-0 align-middle text-center">
+                <thead class="table-dark">
                     <tr>
-                        <td>@room.RoomNum</td>
-                        <td>@room.Description</td>
-
-                        <td>@room.RoomType?.RoomTypeName</td>
-                        <td>@room.RoomType?.Price</td>
-
-                        <td class="text-center">
-                            <img src="@room.Slide1" width="80" height="60" class="rounded" />
-                        </td>
-                        <td class="text-center">
-                            <img src="@room.Slide2" width="80" height="60" class="rounded" />
-                        </td>
-                        <td class="text-center">
-                            <img src="@room.Slide3" width="80" height="60" class="rounded" />
-                        </td>
-
-                        <td>
-                            <a href="/Admin/Room/Edit/@room.RoomId"
-                               class="btn btn-warning btn-sm me-1">Edit</a>
-
-                            <a href="/Admin/Room/Delete/@room.RoomId"
-                               class="btn btn-danger btn-sm">Delete</a>
-                        </td>
+                        <th>Room #</th>
+                        <th>Description</th>
+                        <th>Room Type</th>
+                        <th>Price (EGP)</th>
+                        <th>Preview</th>
+                        <th style="width:160px;">Actions</th>
                     </tr>
-                                }
-            </tbody>
+                </thead>
 
-        </table>
+                <tbody>
+                    @foreach (var room in Model)
+                    {
+                        <tr>
+                            <td class="text-center">
+                                <div class="room-num">#@room.RoomNum</div>
+                                <div class="muted-small">ID: @room.RoomId</div>
+                            </td>
+
+                            <td class="text-start" style="max-width:360px;">
+                                <div style="max-height:72px; overflow:hidden; text-overflow:ellipsis;">
+                                    @room.Description
+                                </div>
+                            </td>
+
+                            <td>
+                                <div>@room.RoomType?.RoomTypeName</div>
+                                <div class="muted-small">People: @room.RoomType?.NumOfPeople</div>
+                            </td>
+
+                            <td>@room.RoomType?.Price</td>
+
+                            <td class="text-center">
+                                <div class="thumb-gallery">
+                                    @* Slide 1 *@
+                                    @if (!string.IsNullOrWhiteSpace(room.Slide1))
+                                    {
+                                        <img src="@room.Slide1" alt="Slide1" class="thumb-img" />
+                                    }
+                                    else
+                                    {
+                                        <div class="thumb-placeholder">No image</div>
+                                    }
+
+                                    @* Slide 2 *@
+                                    @if (!string.IsNullOrWhiteSpace(room.Slide2))
+                                    {
+                                        <img src="@room.Slide2" alt="Slide2" class="thumb-img" />
+                                    }
+                                    else
+                                    {
+                                        <div class="thumb-placeholder">No image</div>
+                                    }
+
+                                    @* Slide 3 *@
+                                    @if (!string.IsNullOrWhiteSpace(room.Slide3))
+                                    {
+                                        <img src="@room.Slide3" alt="Slide3" class="thumb-img" />
+                                    }
+                                    else
+                                    {
+                                        <div class="thumb-placeholder">No image</div>
+                                    }
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a href="/Admin/Room/Edit/@room.RoomId" class="btn btn-warning btn-small">Edit</a>
+                                    <a href="/Admin/Room/Delete/@room.RoomId" class="btn btn-danger btn-small">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
-
 </div>

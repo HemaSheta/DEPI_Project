@@ -1,13 +1,13 @@
 ﻿@model Depi_Project.Models.Booking
 @using Depi_Project.Models
-@inject Microsoft.Extensions.Options.IOptions<StripeSettings> StripeOptions
+@* @inject Microsoft.Extensions.Options.IOptions<StripeSettings> StripeOptions *@
 
 @{
     var room = ViewBag.Room as Room;
     ViewData["Title"] = "Book Room";
 
     // Stripe publishable key (from appsettings)
-    var stripePublishableKey = StripeOptions.Value.PublishableKey;
+    // var stripePublishableKey = StripeOptions.Value.PublishableKey;
 }
 
 <h2>Book Room @room.RoomNum – @room.RoomType.RoomTypeName</h2>
@@ -74,7 +74,6 @@
             return;
         }
 
-        const stripe = Stripe("@stripePublishableKey");
 
         // Create Checkout Session via AJAX
         const response = await fetch("/Customer/Payments/CreateCheckoutSession", {

@@ -1,4 +1,5 @@
-﻿using Depi_Project.Models;
+﻿// Services/Interfaces/IBookingService.cs
+using Depi_Project.Models;
 
 namespace Depi_Project.Services.Interfaces
 {
@@ -14,5 +15,9 @@ namespace Depi_Project.Services.Interfaces
 
         // For preventing overlapping reservations
         bool IsRoomAvailable(int roomId, DateTime checkIn, DateTime checkOut);
+
+        // New: Validate a booking for conflicts and business rules without persisting.
+        // Returns true if OK; false + error message otherwise.
+        bool ValidateBooking(Booking booking, out string error);
     }
 }

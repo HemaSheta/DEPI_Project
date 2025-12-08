@@ -6,6 +6,13 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
 
 <style>
+    .cart-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 20px;
+        align-items: start;
+    }
+
     .cart-card {
         background: #fff;
         border-radius: 14px;
@@ -16,7 +23,7 @@
     .cart-header {
         font-size: 2rem;
         font-weight: 800;
-        margin-bottom: 25px;
+        margin-bottom: 15px;
     }
 
     .thumb-img {
@@ -40,6 +47,15 @@
         padding: 14px 22px;
         border-radius: 12px;
         font-weight: 700;
+        width: 100%;
+    }
+
+    .empty-state {
+        padding: 30px;
+        text-align: center;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.04);
     }
 </style>
 
@@ -58,95 +74,110 @@
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info">
-            Your cart is empty. Browse <a href="/Customer/Room">Rooms</a>.
+        <div class="empty-state">
+            <p>Your cart is empty. Browse <a href="/Customer/Room">Rooms</a>.</p>
         </div>
     }
     else
     {
-        <div class="cart-card">
+        <div class="cart-wrapper">
+            <div>
+                <div class="cart-card">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-dark text-center">
+                            <tr>
+                                <th>Room</th>
+                                <th>Preview</th>
+                                <th>Dates</th>
+                                <th>Price/Night</th>
+                                <th>Nights</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
 
-            <table class="table table-hover align-middle">
-                <thead class="table-dark text-center">
-                    <tr>
-                        <th>Room</th>
-                        <th>Preview</th>
-                        <th>Dates</th>
-                        <th>Price/Night</th>
-                        <th>Nights</th>
-                        <th>Total</th>
-                        <th></th>
-                    </tr>
-                </thead>
+                        <tbody>
+                            @foreach (var it in Model)
+                            {
+                                var nights = (it.CheckOut.Date - it.CheckIn.Date).Days;
+                                if (nights <= 0) nights = 1;
 
-                <tbody>
-                    @foreach (var it in Model)
-                    {
-                        var nights = (it.CheckOut.Date - it.CheckIn.Date).Days;
+                                <tr>
+                                    <td class="text-center">
+                                        <strong>@it.RoomTitle</strong><br />
+                                        <span class="text-muted">Room #@it.RoomNum</span>
+                                    </td>
 
-                        <tr>
-                            <td class="text-center">
-                                <strong>@it.RoomTitle</strong><br />
-                                <span class="text-muted">Room #@it.RoomNum</span>
-                            </td>
+                                    <td class="text-center">
+                                        <img src="@it.Slide" class="thumb-img" />
+                                    </td>
 
-                            <td class="text-center">
-                                <img src="@it.Slide" class="thumb-img" />
-                            </td>
+                                    <td class="text-center">
+                                        <strong>@it.CheckIn.ToString("yyyy-MM-dd")</strong><br />
+                                        <small class="text-muted">→ @it.CheckOut.ToString("yyyy-MM-dd")</small>
+                                    </td>
 
-                            <td class="text-center">
-                                <strong>@it.CheckIn.ToString("yyyy-MM-dd")</strong><br />
-                                <small class="text-muted">→ @it.CheckOut.ToString("yyyy-MM-dd")</small>
-                            </td>
+                                    <td class="text-center">@it.PricePerNight.ToString("F2")</td>
 
-                            <td class="text-center">@it.PricePerNight.ToString("F2")</td>
+                                    <td class="text-center">@nights</td>
 
-                            <td class="text-center">@nights</td>
+                                    <td class="text-center fw-bold">@it.TotalPrice.ToString("F2")</td>
 
-                            <td class="text-center fw-bold">@it.TotalPrice.ToString("F2")</td>
+                                    <td class="text-center">
+                                        <form asp-action="Remove" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="roomId" value="@it.RoomId" />
+                                            <input type="hidden" name="checkIn" value="@it.CheckIn.ToString("yyyy-MM-dd")" />
+                                            <input type="hidden" name="checkOut" value="@it.CheckOut.ToString("yyyy-MM-dd")" />
 
-                            <td class="text-center">
-                                <form asp-action="Remove" method="post" class="d-inline">
-                                    <input type="hidden" name="roomId" value="@it.RoomId" />
-                                    <input type="hidden" name="checkIn" value="@it.CheckIn.ToString("yyyy-MM-dd")" />
-                                    <input type="hidden" name="checkOut" value="@it.CheckOut.ToString("yyyy-MM-dd")" />
+                                            <button type="submit"
+                                                    class="btn btn-danger btn-sm"
+                                                    style="border-radius:8px;">
+                                                Remove
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
 
-                                    <button type="submit"
-                                            class="btn btn-danger btn-sm"
-                                            style="border-radius:8px;">
-                                        Remove
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-
-            <div class="d-flex justify-content-between align-items-center mt-4">
-
-                <form asp-action="Clear" method="post">
-                    <button class="btn btn-outline-secondary" type="submit">Clear Cart</button>
-                </form>
-
-                <div class="price-box">
-                    Total:
-                    <strong class="text-success">
-                        @Model.Sum(i => i.TotalPrice).ToString("F2")
-                    </strong> EGP
-
-                    <br />
-
-                    <button id="checkoutBtn" class="btn btn-success checkout-btn mt-2">
-                        Proceed to Checkout
-                    </button>
+                    <div class="mt-3">
+                        <form asp-action="Clear" method="post" style="display:inline-block;">
+                            @Html.AntiForgeryToken()
+                            <button class="btn btn-outline-secondary" type="submit">Clear Cart</button>
+                        </form>
+                    </div>
                 </div>
             </div>
 
+            <div>
+                <div class="cart-card price-box">
+                    <h5 class="mb-3">Summary</h5>
+                    <div style="font-size:1.25rem;">
+                        Total:
+                        <strong class="text-success">@Model.Sum(i => i.TotalPrice).ToString("F2")</strong> EGP
+                    </div>
+
+                    <div class="mt-4">
+                        @* Hidden antiforgery token for AJAX checkout *@
+                        <form id="checkoutForm" method="post" asp-action="Checkout">
+                            @Html.AntiForgeryToken()
+                        </form>
+
+                        <button id="checkoutBtn" class="btn btn-success checkout-btn mt-2">
+                            Proceed to Checkout
+                        </button>
+                    </div>
+
+                    <div class="mt-3 text-muted small">
+                        After checkout your booking will be recorded with Payment Status = <strong>Not Paid</strong>.
+                    </div>
+                </div>
+            </div>
         </div>
     }
 </div>
-
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -161,37 +192,43 @@
             if (s) toastr.success(s);
             if (e) toastr.error(e);
 
-            // ✔ AJAX Checkout Button
+            // AJAX Checkout: posts antiforgery token found in the hidden form
             $("#checkoutBtn").on("click", function () {
-
-                let btn = $(this);
+                var btn = $(this);
                 btn.prop("disabled", true).text("Processing...");
 
+                // find token
+                var tokenEl = $("#checkoutForm input[name='__RequestVerificationToken']");
+                var token = tokenEl.val();
+
                 $.ajax({
-                    url: "/Customer/Payments/CheckoutFromCart",
-                    method: "GET",
+                    url: "/Customer/Cart/Checkout",
+                    method: "POST",
+                    headers: {
+                        "RequestVerificationToken": token
+                    },
                     success: function (res) {
-                        if (res && res.url) {
-                            window.location.href = res.url; // Redirect to Stripe
+                        if (res && res.success && res.redirect) {
+                            // redirect to the provided location (server-specified)
+                            window.location.href = res.redirect;
                         } else {
                             toastr.error("Unexpected server response.");
                             btn.prop("disabled", false).text("Proceed to Checkout");
                         }
                     },
                     error: function (xhr) {
-
-                        let msg = "Something went wrong.";
-
-                        if (xhr.responseJSON && xhr.responseJSON.error) {
-                            msg = xhr.responseJSON.error;
+                        var msg = "Something went wrong.";
+                        try {
+                            var j = xhr.responseJSON;
+                            if (j && j.error) msg = j.error;
+                            else if (xhr.responseText) msg = xhr.responseText;
+                        } catch (ex) {
                         }
-
                         toastr.error(msg);
                         btn.prop("disabled", false).text("Proceed to Checkout");
                     }
                 });
             });
-
         });
     </script>
 }

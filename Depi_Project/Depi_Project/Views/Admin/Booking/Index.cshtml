@@ -1,59 +1,175 @@
-﻿@model IEnumerable<Depi_Project.Models.Booking>
+﻿@model List<Depi_Project.Controllers.Admin.BookingController.BookingListItem>
 
 @{
-    ViewData["Title"] = "Bookings";
+    ViewData["Title"] = "Bookings (Admin)";
+    var rooms = ViewBag.Rooms as List<Depi_Project.Models.Room> ?? new List<Depi_Project.Models.Room>();
+    var paymentStatuses = ViewBag.PaymentStatuses as List<string> ?? new List<string>();
 }
 
-<div class="container mt-4" style="max-width: 1200px;">
+<style>
+    .admin-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
 
-    <h2 class="mb-4 text-center fw-bold" style="font-size: 2rem;">Bookings</h2>
+    .filter-card {
+        background: #ffffff;
+        padding: 18px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        margin-bottom: 25px;
+    }
 
-    <div class="card shadow-sm p-3">
+    .admin-table {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.1);
+    }
 
-        <table class="table table-hover table-bordered mb-0">
+    .badge-paid {
+        background: #28a745 !important;
+        color: white;
+    }
+
+    .badge-notpaid {
+        background: #dc3545 !important;
+        color: white;
+    }
+
+    .btn-small {
+        padding: 3px 8px;
+        font-size: 0.85rem;
+    }
+
+</style>
+
+<div class="admin-container py-4">
+
+    <h2 class="fw-bold mb-3">Bookings (Admin)</h2>
+
+    <!-- FILTERS -->
+    <div class="filter-card">
+        <form method="get" class="row g-2">
+            <div class="col-md-3">
+                <label class="form-label">Search (Email / Phone)</label>
+                <input name="search" class="form-control" placeholder="Search..." value="@ViewBag.Search" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">From</label>
+                <input name="from" type="date" class="form-control" value="@ViewBag.From" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">To</label>
+                <input name="to" type="date" class="form-control" value="@ViewBag.To" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Room</label>
+                <select name="roomId" class="form-select">
+                    <option value="">All</option>
+                    @foreach (var r in rooms)
+                    {
+                        <option value="@r.RoomId" @@(ViewBag.RoomId != null && ViewBag.RoomId == r.RoomId ? "selected" : "")>
+                            Room @r.RoomNum (@r.RoomType?.RoomTypeName)
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Payment</label>
+                <select name="paymentStatus" class="form-select">
+                    <option value="">All</option>
+                    @foreach (var ps in paymentStatuses)
+                    {
+                        <option value="@ps" @@(ps == (ViewBag.PaymentStatus ?? "") ? "selected" : "")>@ps</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-1 d-flex align-items-end">
+                <button class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+
+
+    <!-- BOOKINGS TABLE -->
+    <div class="admin-table">
+        <table class="table table-striped table-hover align-middle text-center">
             <thead class="table-dark">
                 <tr>
+                    <th>#</th>
                     <th>Room</th>
-                    <th>User Profile ID</th>
-                    <th>Check In</th>
-                    <th>Check Out</th>
-                    <th>Total Price (EGP)</th>
-                    <th>Payment Status</th>
-                    <th style="width: 140px;">Actions</th>
+                    <th>Customer</th>
+                    <th>Check-In</th>
+                    <th>Check-Out</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th style="width: 130px;">Actions</th>
                 </tr>
             </thead>
 
             <tbody>
-                @foreach (var b in Model)
+                @foreach (var item in Model)
                 {
+                    var b = item.Booking;
+                    var p = item.Profile;
+
                     <tr>
-                        <td>@b.RoomId</td>
-                        <td>@b.IdentityUserId</td>
+                        <td>@b.BookingId</td>
+
+                        <td>
+                            @if (b.Room != null)
+                            {
+                                <div>Room @b.Room.RoomNum</div>
+                                <div class="text-muted small">@b.Room.RoomType?.RoomTypeName</div>
+                            }
+                            else
+                            {
+                                <div>Room @b.RoomId</div>
+                            }
+                        </td>
+
+                        <td>
+                            <div>@item.Email</div>
+                            @if (p != null)
+                            {
+                                <div class="text-muted small">@p.FirstName @p.LastName</div>
+                                <div class="text-muted small">@p.Phone</div>
+                            }
+                        </td>
 
                         <td>@b.CheckTime.ToString("yyyy-MM-dd")</td>
                         <td>@b.CheckOutTime.ToString("yyyy-MM-dd")</td>
 
-                        <td>@b.TotalPrice</td>
+                        <td>@b.TotalPrice.ToString("F2")</td>
 
                         <td>
-                            <span class="badge
-                                    @(b.PaymentStatus == "Paid" ? "bg-success" : "bg-warning text-dark")">
-                                @b.PaymentStatus
-                            </span>
+                            @if (b.PaymentStatus == "Paid")
+                            {
+                                <span class="badge badge-paid">Paid</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-notpaid">Not Paid</span>
+                            }
                         </td>
 
                         <td>
-                            <a href="/Admin/Booking/Delete/@b.BookingId"
-                               class="btn btn-danger btn-sm">
-                                Cancel
-                            </a>
+                            <a class="btn btn-outline-primary btn-sm btn-small"
+                               href="/Admin/Booking/Details/@b.BookingId">Details</a>
+
+                            <a class="btn btn-outline-warning btn-sm btn-small"
+                               href="/Admin/Booking/EditPayment/@b.BookingId">Edit</a>
                         </td>
                     </tr>
                 }
             </tbody>
-
         </table>
-
     </div>
 
 </div>

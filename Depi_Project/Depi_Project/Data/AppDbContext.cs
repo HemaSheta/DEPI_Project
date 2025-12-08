@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿// Data/AppDbContext.cs
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Depi_Project.Models;
@@ -35,18 +36,18 @@ namespace Depi_Project.Data
                 .HasForeignKey(b => b.RoomId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Booking -> IdentityUser (many bookings can belong to one Identity user)
+            // Booking -> IdentityUser (N:1)
+            // Explicit navigation mapping to avoid EF creating duplicate FK columns.
             builder.Entity<Booking>()
-                .HasOne<IdentityUser>()
-                .WithMany()
+                .HasOne(b => b.IdentityUser)
+                .WithMany() // we don't expose a collection on IdentityUser
                 .HasForeignKey(b => b.IdentityUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // UserProfile -> IdentityUser
-            // Explicitly map UserProfile.IdentityUserId -> AspNetUsers.Id with Restrict delete behavior.
             builder.Entity<UserProfile>()
                 .HasOne(up => up.IdentityUser)
-                .WithMany() // user can have many dependent entities, but we don't expose navigation from IdentityUser
+                .WithMany()
                 .HasForeignKey(up => up.IdentityUserId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
