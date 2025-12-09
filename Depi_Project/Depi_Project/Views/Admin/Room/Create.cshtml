@@ -4,8 +4,91 @@
     ViewData["Title"] = "Create Room";
 }
 
-<div class="container mt-4" style="max-width: 900px;">
-    <h2 class="mb-4 text-center fw-bold" style="font-size: 2rem;">Create Room</h2>
+<style>
+    /* PAGE BACKGROUND */
+    body {
+        background: #0f172a !important;
+        font-family: 'Inter','Segoe UI',sans-serif;
+        color: #e6eef8;
+        margin: 0;
+    }
+
+    .page-wrapper {
+        max-width: 950px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    /* PAGE TITLE */
+    .page-title {
+        font-size: 2.2rem;
+        font-weight: 900;
+        text-align: center;
+        color: #fff;
+        margin-bottom: 25px;
+    }
+
+    /* CARD STYLING (glass effect) */
+    .form-card {
+        background: rgba(255,255,255,0.05);
+        padding: 28px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+        backdrop-filter: blur(6px);
+    }
+
+    /* LABEL + INPUT STYLING */
+    .form-label {
+        font-weight: 600;
+        color: #dbeafe;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 12px;
+        background: rgba(255,255,255,0.95);
+        color: #0f172a;
+        border: 1px solid #e2e8f0;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #3A8DFF;
+            box-shadow: 0 0 8px rgba(58,141,255,0.6);
+        }
+
+    /* BUTTONS */
+    .btn-create {
+        background: linear-gradient(90deg,#3A8DFF,#6CC3FF);
+        border: none;
+        line-height: 1.5;
+        padding: 12px 26px;
+        font-weight: 800;
+        border-radius: 10px;
+        color: white;
+    }
+
+        .btn-create:hover {
+            opacity: .9;
+            transform: translateY(-2px);
+        }
+
+    .btn-cancel {
+        border-radius: 10px;
+        padding: 12px 26px;
+        font-weight: 700;
+    }
+
+    .alert-danger {
+        border-radius: 10px;
+        font-size: 0.95rem;
+    }
+</style>
+
+
+<div class="page-wrapper">
+    <h2 class="page-title">Create Room</h2>
+
     @if (!ViewData.ModelState.IsValid)
     {
         <ul class="alert alert-danger">
@@ -19,28 +102,29 @@
         </ul>
     }
 
-
-
-    <div class="card shadow-sm p-4">
+    <div class="form-card">
         <form asp-action="Create" method="post" enctype="multipart/form-data">
 
+            <!-- ROOM NUMBER -->
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">Room Number</label>
+                    <label class="form-label">Room Number</label>
                     <input asp-for="RoomNum" class="form-control" />
                     <span asp-validation-for="RoomNum" class="text-danger"></span>
                 </div>
             </div>
 
+            <!-- DESCRIPTION -->
             <div class="mb-3">
-                <label class="form-label fw-semibold">Description</label>
+                <label class="form-label">Description</label>
                 <input asp-for="Description" class="form-control" />
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
 
+            <!-- ROOM TYPE -->
             <div class="mb-3">
-                <label class="form-label fw-semibold">Room Type</label>
-                <select asp-for="RoomTypeId" class="form-control">
+                <label class="form-label">Room Type</label>
+                <select asp-for="RoomTypeId" class="form-select">
                     @foreach (var type in ViewBag.RoomTypes)
                     {
                         <option value="@type.RoomTypeId">@type.RoomTypeName</option>
@@ -49,27 +133,34 @@
                 <span asp-validation-for="RoomTypeId" class="text-danger"></span>
             </div>
 
+            <!-- IMAGE UPLOADS -->
             <div class="row">
                 <div class="col-md-4 mb-3">
-                    <label class="form-label fw-semibold">Slide 1 (required)</label>
+                    <label class="form-label">Slide 1 (required)</label>
                     <input type="file" name="Slide1File" class="form-control" required />
                 </div>
 
                 <div class="col-md-4 mb-3">
-                    <label class="form-label fw-semibold">Slide 2 (optional)</label>
+                    <label class="form-label">Slide 2 (optional)</label>
                     <input type="file" name="Slide2File" class="form-control" />
                 </div>
 
                 <div class="col-md-4 mb-3">
-                    <label class="form-label fw-semibold">Slide 3 (optional)</label>
+                    <label class="form-label">Slide 3 (optional)</label>
                     <input type="file" name="Slide3File" class="form-control" />
                 </div>
             </div>
 
+            <!-- BUTTONS -->
             <div class="d-flex justify-content-between mt-4">
-                <a href="/Admin/Room" class="btn btn-secondary px-4">Cancel</a>
-                <button class="btn btn-success px-4" type="submit">Create</button>
+                <a href="/Admin/Room" class="btn btn-secondary btn-cancel">Cancel</a>
+                <button class="btn btn-success btn-create" type="submit">Create</button>
             </div>
         </form>
     </div>
 </div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

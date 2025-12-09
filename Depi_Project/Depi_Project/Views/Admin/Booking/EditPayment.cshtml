@@ -3,11 +3,80 @@
     ViewData["Title"] = "Edit Payment Status";
 }
 
-<div class="container py-4" style="max-width:700px;">
-    <h2 class="mb-3">Edit Payment — Booking #@Model.BookingId</h2>
+<style>
+    body {
+        background: #0f172a;
+        color: #e6eef8;
+    }
 
-    <div class="card p-3">
+    .edit-container {
+        max-width: 700px;
+        margin: 40px auto;
+        padding: 0 16px;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: #ffffff;
+        margin-bottom: 18px;
+        text-align: center;
+    }
+
+    .edit-card {
+        background: rgba(255,255,255,0.05);
+        padding: 25px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+    }
+
+    .edit-card label {
+        font-weight: 600;
+        color: #dbeafe;
+    }
+
+    .form-select {
+        background: #fff;
+        color: #0b1220;
+        border-radius: 10px;
+        padding: 10px 12px;
+    }
+
+    .btn-save {
+        background: linear-gradient(90deg,#3A8DFF,#6CC3FF);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .btn-save:hover {
+        opacity: .9;
+    }
+
+    .btn-cancel {
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 700;
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.4);
+        color: #e6eef8;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255,255,255,0.1);
+    }
+</style>
+
+<div class="edit-container">
+
+    <h2 class="page-title">Edit Payment — Booking #@Model.BookingId</h2>
+
+    <div class="edit-card">
         <form method="post" asp-action="EditPaymentPost" asp-route-id="@Model.BookingId">
+
             <div class="mb-3">
                 <label class="form-label">Payment Status</label>
                 <select name="paymentStatus" class="form-select">
@@ -17,10 +86,12 @@
                 </select>
             </div>
 
-            <div class="d-flex gap-2">
-                <button class="btn btn-primary" type="submit">Save</button>
-                <a class="btn btn-outline-secondary" href="/Admin/Booking">Cancel</a>
+            <div class="d-flex justify-content-between mt-3">
+                <button class="btn-save" type="submit">Save Changes</button>
+                <a class="btn-cancel" href="/Admin/Booking">Cancel</a>
             </div>
+
         </form>
     </div>
+
 </div>

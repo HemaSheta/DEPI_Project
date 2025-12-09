@@ -4,30 +4,256 @@
     var profile = ViewBag.Profile as Depi_Project.Models.UserProfile;
 }
 
-<div class="container py-4" style="max-width:900px;">
-    <h2 class="mb-3">Booking Details — #@Model.BookingId</h2>
+<style>
+    /* Page background consistent with other pages (content area only) */
+    .admin-page-wrap {
+        min-height: 100vh;
+        background: #0f172a;
+        padding: 28px 16px;
+        color: #e6eef8;
+    }
 
-    <div class="card p-3 mb-3">
-        <h5>Customer</h5>
-        <p>
-            <strong>Email:</strong> @Model.IdentityUser?.Email <br />
-            <strong>Name:</strong> @(profile != null ? $"{profile.FirstName} {profile.LastName}" : "—") <br />
-            <strong>Phone:</strong> @(profile?.Phone ?? "—")
-        </p>
-    </div>
+    .page-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
 
-    <div class="card p-3 mb-3">
-        <h5>Room & Booking</h5>
-        <p>
-            <strong>Room:</strong> @(Model.Room?.RoomType?.RoomTypeName ?? "—") — #@(Model.Room?.RoomNum ?? 0) <br />
-            <strong>Dates:</strong> @Model.CheckTime.ToString("yyyy-MM-dd") → @Model.CheckOutTime.ToString("yyyy-MM-dd") <br />
-            <strong>Total:</strong> @Model.TotalPrice.ToString("F2") EGP <br />
-            <strong>Payment:</strong> @Model.PaymentStatus
-        </p>
+    .page-title {
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: #ffffff;
+        margin-bottom: 18px;
+    }
 
-        <div class="mt-3">
-            <a class="btn btn-outline-secondary" href="/Admin/Booking">Back to Bookings</a>
-            <a class="btn btn-warning" href="/Admin/Booking/EditPayment/@Model.BookingId">Edit Payment</a>
+    .glass-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        color: #e6eef8;
+        margin-bottom: 18px;
+    }
+
+    .section-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 8px;
+    }
+
+    .muted {
+        color: rgba(230,238,248,0.75);
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .detail-left {
+        flex: 1 1 60%;
+    }
+
+    .detail-right {
+        flex: 1 1 35%;
+        text-align: right;
+    }
+
+    .info-line {
+        margin: 4px 0;
+        color: #e6eef8;
+    }
+
+    .info-small {
+        color: rgba(230,238,248,0.75);
+        font-size: 0.95rem;
+    }
+
+    .badge-paid {
+        background: #28a745;
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+    }
+
+    .badge-notpaid {
+        background: #dc3545;
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+    }
+
+    .badge-pending {
+        background: #ffc107;
+        color: #000;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+    }
+
+    .badge-approved {
+        background: #198754;
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+    }
+
+    .badge-canceled {
+        background: #dc3545;
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+    }
+
+    .btn-primary-ghost {
+        background: linear-gradient(90deg,#3A8DFF,#6CC3FF);
+        border: none;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-weight: 800;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-outline-ghost {
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.12);
+        color: #e6eef8;
+        padding: 10px 14px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .controls {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 12px;
+        flex-wrap: wrap;
+    }
+
+    .meta-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    @@media (max-width:700px) {
+        .meta-grid
+
+    {
+        grid-template-columns: 1fr;
+    }
+
+    }
+</style>
+
+<div class="admin-page-wrap">
+    <div class="page-container">
+
+        <h2 class="page-title">Booking Details — #@Model.BookingId</h2>
+
+        <!-- Customer Card -->
+        <div class="glass-card">
+            <div class="section-title">Customer</div>
+
+            <div class="detail-row">
+                <div class="detail-left">
+                    <div class="info-line"><strong>Email:</strong> <span class="muted">@Model.IdentityUser?.Email ?? "—"</span></div>
+                    <div class="info-line"><strong>Name:</strong> <span class="muted">@(profile != null ? $"{profile.FirstName} {profile.LastName}" : "—")</span></div>
+                    <div class="info-line"><strong>Phone:</strong> <span class="muted">@(profile?.Phone ?? "—")</span></div>
+                </div>
+
+                <div class="detail-right">
+                    <div class="info-small">Customer ID</div>
+                    <div class="info-line">@Model.IdentityUserId</div>
+                </div>
+            </div>
         </div>
+
+        <!-- Room & Booking Card -->
+        <div class="glass-card">
+            <div class="section-title">Room & Booking</div>
+
+            <div class="meta-grid">
+                <div>
+                    <div class="info-line"><strong>Room:</strong> <span class="muted">@Model.Room?.RoomType?.RoomTypeName ?? "—"</span></div>
+                    <div class="info-line"><strong>Room #:</strong> <span class="muted">#@(Model.Room?.RoomNum ?? Model.RoomId)</span></div>
+                </div>
+
+                <div style="text-align:right;">
+                    <div class="info-small">Booking created</div>
+                    <div class="info-line">@Model.CheckTime.ToString("yyyy-MM-dd")</div>
+                </div>
+
+                <div>
+                    <div class="info-line"><strong>Dates:</strong></div>
+                    <div class="info-line">@Model.CheckTime.ToString("yyyy-MM-dd") → @Model.CheckOutTime.ToString("yyyy-MM-dd")</div>
+                </div>
+
+                <div style="text-align:right;">
+                    <div class="info-line"><strong>Total:</strong></div>
+                    <div class="info-line fw-bold">@Model.TotalPrice.ToString("F2") EGP</div>
+                </div>
+
+                <div>
+                    <div class="info-line"><strong>Payment:</strong></div>
+                    <div class="info-line">
+                        @if (Model.PaymentStatus == "Paid")
+                        {
+                            <span class="badge-paid">Paid</span>
+                        }
+                        else if (Model.PaymentStatus == "Pending")
+                        {
+                            <span class="badge-pending">Pending</span>
+                        }
+                        else
+                        {
+                            <span class="badge-notpaid">Not Paid</span>
+                        }
+                    </div>
+                </div>
+
+                <div style="text-align:right;">
+                    <div class="info-line"><strong>Status:</strong></div>
+                    <div class="info-line">
+                        @if (Model.Status == "Approved")
+                        {
+                            <span class="badge-approved">Approved</span>
+                        }
+                        else if (Model.Status == "Pending")
+                        {
+                            <span class="badge-pending">Pending</span>
+                        }
+                        else
+                        {
+                            <span class="badge-canceled">Canceled</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <a class="btn-outline-ghost" href="/Admin/Booking">Back to Bookings</a>
+                <a class="btn-primary-ghost" href="/Admin/Booking/EditPayment/@Model.BookingId">Edit Payment</a>
+
+                @* Cancel form (soft cancel) *@
+                <form asp-controller="Booking" asp-action="Cancel" asp-route-id="@Model.BookingId" method="post" onsubmit="return confirm('Cancel this booking?');" style="display:inline-block;">
+                    <button type="submit" class="btn-outline-ghost" style="border-color: rgba(220,53,69,0.9); color:#fff;">
+                        Cancel Booking
+                    </button>
+                </form>
+            </div>
+        </div>
+
     </div>
 </div>

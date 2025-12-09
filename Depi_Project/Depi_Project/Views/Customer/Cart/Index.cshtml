@@ -6,143 +6,221 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
 
 <style>
-    .cart-card {
-        background: #fff;
-        border-radius: 14px;
-        padding: 25px;
-        box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+    body {
+        background: #0f172a;
+        color: #e6eef8;
+        font-family: 'Inter','Segoe UI',sans-serif;
+    }
+
+    .page-wrapper {
+        max-width: 1250px;
+        margin: 0 auto;
+        padding: 30px 20px;
+        display: flex;
+        gap: 25px;
+        align-items: flex-start;
+    }
+
+    /* LEFT COLUMN — CART CARDS */
+    .cart-items-box {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
     }
 
     .cart-header {
-        font-size: 2rem;
-        font-weight: 800;
-        margin-bottom: 25px;
+        font-size: 1.9rem;
+        font-weight: 900;
+        margin-bottom: 10px;
+        color: white;
+    }
+
+    .cart-card {
+        background: rgba(255,255,255,0.06);
+        padding: 18px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.1);
+        backdrop-filter: blur(4px);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.4);
+        display: flex;
+        gap: 18px;
+        align-items: center;
     }
 
     .thumb-img {
-        width: 110px;
-        height: 75px;
+        width: 130px;
+        height: 90px;
         object-fit: cover;
-        border-radius: 8px;
-        border: 1px solid #ddd;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .card-info {
+        flex: 1;
+        color: #fff;
+    }
+
+        .card-info h4 {
+            margin: 0;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: #fff;
+        }
+
+        .card-info small {
+            color: #c7d2fe;
+        }
+
+    .date-box {
+        margin-top: 5px;
+        font-size: 0.9rem;
+        color: #e2e8f0;
     }
 
     .price-box {
-        background: #f8f9fa;
-        padding: 18px;
-        border-radius: 10px;
+        text-align: right;
+        color: #38ef7d;
         font-size: 1.2rem;
-        box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        font-weight: 700;
+        min-width: 120px;
+    }
+
+    .remove-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-weight: 700;
+        margin-top: 8px;
+    }
+
+    /* RIGHT COLUMN — SUMMARY BOX */
+    .summary-box {
+        width: 310px;
+        background: rgba(255,255,255,0.07);
+        padding: 25px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.1);
+        backdrop-filter: blur(4px);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.45);
+        position: sticky;
+        top: 90px;
+        color: #fff;
+    }
+
+    .summary-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        margin-bottom: 12px;
+    }
+
+    .summary-total {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: #38ef7d;
     }
 
     .checkout-btn {
-        font-size: 1.2rem;
-        padding: 14px 22px;
+        width: 100%;
+        padding: 14px;
+        margin-top: 15px;
+        border-radius: 10px;
+        background: linear-gradient(90deg,#3A8DFF,#6CC3FF);
+        border: none;
+        color: #fff;
+        font-weight: 800;
+    }
+
+    .clear-btn {
+        width: 100%;
+        padding: 10px;
+        border-radius: 10px;
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.2);
+        color: #fff;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .empty-box {
+        background: rgba(255,255,255,0.07);
+        padding: 20px;
         border-radius: 12px;
-        font-weight: 700;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.12);
     }
 </style>
 
-<div class="container py-4" style="max-width:1150px;">
 
-    <h2 class="cart-header">🛒 Reservation Cart</h2>
+<div class="page-wrapper">
 
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success">@TempData["Success"]</div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger">@TempData["Error"]</div>
-    }
+    <!-- LEFT SIDE — CART ITEMS -->
+    <div class="cart-items-box">
 
-    @if (!Model.Any())
-    {
-        <div class="alert alert-info">
-            Your cart is empty. Browse <a href="/Customer/Room">Rooms</a>.
-        </div>
-    }
-    else
-    {
-        <div class="cart-card">
+        <h2 class="cart-header">🛒 Reservation Cart</h2>
 
-            <table class="table table-hover align-middle">
-                <thead class="table-dark text-center">
-                    <tr>
-                        <th>Room</th>
-                        <th>Preview</th>
-                        <th>Dates</th>
-                        <th>Price/Night</th>
-                        <th>Nights</th>
-                        <th>Total</th>
-                        <th></th>
-                    </tr>
-                </thead>
+        @if (!Model.Any())
+        {
+            <div class="empty-box">
+                <h5>Your cart is empty.</h5>
+                <a href="/Customer/Room" class="btn btn-light mt-2">Browse Rooms</a>
+            </div>
+        }
+        else
+        {
+            @foreach (var it in Model)
+            {
+                var nights = (it.CheckOut.Date - it.CheckIn.Date).Days;
 
-                <tbody>
-                    @foreach (var it in Model)
-                    {
-                        var nights = (it.CheckOut.Date - it.CheckIn.Date).Days;
+                <div class="cart-card">
 
-                        <tr>
-                            <td class="text-center">
-                                <strong>@it.RoomTitle</strong><br />
-                                <span class="text-muted">Room #@it.RoomNum</span>
-                            </td>
+                    <img src="@it.Slide" class="thumb-img" />
 
-                            <td class="text-center">
-                                <img src="@it.Slide" class="thumb-img" />
-                            </td>
+                    <div class="card-info">
+                        <h4>@it.RoomTitle</h4>
+                        <small>Room #@it.RoomNum</small>
 
-                            <td class="text-center">
-                                <strong>@it.CheckIn.ToString("yyyy-MM-dd")</strong><br />
-                                <small class="text-muted">→ @it.CheckOut.ToString("yyyy-MM-dd")</small>
-                            </td>
+                        <div class="date-box">
+                            @it.CheckIn.ToString("yyyy-MM-dd") → @it.CheckOut.ToString("yyyy-MM-dd")
+                            <br />
+                            <small>@nights night(s)</small>
+                        </div>
 
-                            <td class="text-center">@it.PricePerNight.ToString("F2")</td>
+                        <form asp-action="Remove" method="post">
+                            <input type="hidden" name="roomId" value="@it.RoomId" />
+                            <input type="hidden" name="checkIn" value="@it.CheckIn.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="checkOut" value="@it.CheckOut.ToString("yyyy-MM-dd")" />
+                            <button class="remove-btn">Remove</button>
+                        </form>
+                    </div>
 
-                            <td class="text-center">@nights</td>
+                    <div class="price-box">
+                        @it.TotalPrice.ToString("F2") EGP
+                    </div>
 
-                            <td class="text-center fw-bold">@it.TotalPrice.ToString("F2")</td>
-
-                            <td class="text-center">
-                                <form asp-action="Remove" method="post" class="d-inline">
-                                    <input type="hidden" name="roomId" value="@it.RoomId" />
-                                    <input type="hidden" name="checkIn" value="@it.CheckIn.ToString("yyyy-MM-dd")" />
-                                    <input type="hidden" name="checkOut" value="@it.CheckOut.ToString("yyyy-MM-dd")" />
-
-                                    <button type="submit"
-                                            class="btn btn-danger btn-sm"
-                                            style="border-radius:8px;">
-                                        Remove
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-
-            <div class="d-flex justify-content-between align-items-center mt-4">
-
-                <form asp-action="Clear" method="post">
-                    <button class="btn btn-outline-secondary" type="submit">Clear Cart</button>
-                </form>
-
-                <div class="price-box">
-                    Total:
-                    <strong class="text-success">
-                        @Model.Sum(i => i.TotalPrice).ToString("F2")
-                    </strong> EGP
-
-                    <br />
-
-                    <button id="checkoutBtn" class="btn btn-success checkout-btn mt-2">
-                        Proceed to Checkout
-                    </button>
                 </div>
+            }
+        }
+    </div>
+
+
+    <!-- RIGHT SIDE — SUMMARY -->
+    @if (Model.Any())
+    {
+        <div class="summary-box">
+            <h3 class="summary-title">Summary</h3>
+
+            <div class="summary-total">
+                @Model.Sum(i => i.TotalPrice).ToString("F2") EGP
             </div>
 
+            <form asp-action="Clear" method="post">
+                <button class="clear-btn" type="submit">Clear Cart</button>
+            </form>
+
+            <button id="checkoutBtn" class="checkout-btn">Proceed to Checkout</button>
         </div>
     }
 </div>
@@ -153,63 +231,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
-        $(function () {
+        $("#checkoutBtn").on("click", function () {
 
-            // Toastr messages
-            var s = '@TempData["Success"]';
-            var e = '@TempData["Error"]';
-            if (s) toastr.success(s);
-            if (e) toastr.error(e);
+            let btn = $(this);
+            btn.prop("disabled", true).text("Processing...");
 
-            // ✔ Improved AJAX Checkout Button
-            $("#checkoutBtn").on("click", function () {
-
-                let btn = $(this);
-                btn.prop("disabled", true).text("Processing...");
-
-                $.ajax({
-                    url: "/Customer/Payments/CheckoutFromCart",
-                    method: "GET",
-                    dataType: "json",
-                    success: function (res, textStatus, xhr) {
-                        // Expect { url: "..." } on success (200)
-                        if (res && res.url) {
-                            window.location.href = res.url;
-                            return;
-                        }
-
-                        // Sometimes server returns 200 with an error payload - handle
-                        var msg = res && (res.message || res.error) ? (res.message || res.error) : "Unexpected server response.";
-                        toastr.error(msg);
-                        console.error("CheckoutFromCart success but unexpected payload:", res);
-                        btn.prop("disabled", false).text("Proceed to Checkout");
-                    },
-                    error: function (xhr, status, err) {
-                        // Try to parse JSON body
-                        var msg = "Something went wrong";
-                        try {
-                            if (xhr && xhr.responseJSON) {
-                                msg = xhr.responseJSON.message || xhr.responseJSON.error || JSON.stringify(xhr.responseJSON);
-                            } else if (xhr && xhr.responseText) {
-                                // sometimes server returns JSON text
-                                try {
-                                    var j = JSON.parse(xhr.responseText);
-                                    msg = j.message || j.error || xhr.responseText;
-                                } catch (e) {
-                                    msg = xhr.responseText;
-                                }
-                            }
-                        } catch (ex) {
-                            msg = "Unknown error during checkout.";
-                        }
-
-                        toastr.error(msg);
-                        console.error("CheckoutFromCart error", { status: xhr.status, response: xhr.responseText, parsed: xhr.responseJSON });
+            $.ajax({
+                url: "/Customer/Payments/CheckoutFromCart",
+                method: "GET",
+                dataType: "json",
+                success: function (res) {
+                    if (res && res.url) window.location.href = res.url;
+                    else {
+                        toastr.error("Unexpected server response.");
                         btn.prop("disabled", false).text("Proceed to Checkout");
                     }
-                });
+                },
+                error: function (xhr) {
+                    var msg = xhr.responseJSON?.message || xhr.responseJSON?.error || "Checkout failed.";
+                    toastr.error(msg);
+                    btn.prop("disabled", false).text("Proceed to Checkout");
+                }
             });
-
         });
     </script>
 }

@@ -4,39 +4,116 @@
     ViewData["Title"] = "Create Room Type";
 }
 
-<div class="container mt-4" style="max-width: 700px;">
+<style>
+    /* Global dark background */
+    body {
+        background: #0f172a !important;
+        color: #e6eef8;
+        font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
 
-    <h2 class="mb-4 text-center fw-bold" style="font-size: 2rem;">Create Room Type</h2>
+    .create-container {
+        max-width: 700px;
+        margin: 50px auto;
+        padding: 20px;
+    }
 
-    <div class="card shadow-sm p-4">
+    .create-card {
+        background: rgba(255,255,255,0.04);
+        padding: 28px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.06);
+        box-shadow: 0 8px 26px rgba(0,0,0,0.45);
+    }
+
+    h2 {
+        color: #ffffff;
+        font-weight: 900;
+        font-size: 2rem;
+        margin-bottom: 28px;
+        text-align: center;
+    }
+
+    label {
+        font-weight: 600;
+        color: #dbeafe;
+        margin-bottom: 6px;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        padding: 12px;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: #ffffff;
+        color: #0b1220;
+        font-weight: 500;
+    }
+
+    /* Buttons */
+    .btn-create {
+        background: #10b981; /* Green */
+        border: none;
+        color: white;
+        padding: 12px 26px;
+        font-weight: 800;
+        border-radius: 10px;
+    }
+
+        .btn-create:hover {
+            filter: brightness(.92);
+        }
+
+    .btn-cancel {
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.3);
+        color: #e6eef8;
+        padding: 12px 26px;
+        font-weight: 700;
+        border-radius: 10px;
+    }
+
+        .btn-cancel:hover {
+            background: rgba(255,255,255,0.08);
+        }
+</style>
+
+<div class="create-container">
+    <h2>Create Room Type</h2>
+
+    <div class="create-card">
 
         <form asp-action="Create" method="post">
 
-            <div class="form-group mb-3">
-                <label class="fw-semibold">Room Type Name</label>
+            <div class="mb-3">
+                <label>Room Type Name</label>
                 <input asp-for="RoomTypeName" class="form-control" />
                 <span asp-validation-for="RoomTypeName" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
-                <label class="fw-semibold">Price (EGP)</label>
+            <div class="mb-3">
+                <label>Price (EGP)</label>
                 <input asp-for="Price" class="form-control" />
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3">
-                <label class="fw-semibold">Number of People</label>
+            <div class="mb-3">
+                <label>Number of People</label>
                 <input asp-for="NumOfPeople" class="form-control" />
                 <span asp-validation-for="NumOfPeople" class="text-danger"></span>
             </div>
 
             <div class="d-flex justify-content-between mt-4">
-                <a href="/Admin/RoomType" class="btn btn-secondary px-4">Cancel</a>
-                <button class="btn btn-success px-4" type="submit">Create</button>
+                <a href="/Admin/RoomType" class="btn-cancel">Cancel</a>
+                <button class="btn-create" type="submit">Create</button>
             </div>
 
         </form>
 
     </div>
-
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -4,19 +4,90 @@
     ViewData["Title"] = "Delete Room Type";
 }
 
-<div class="container mt-4" style="max-width: 700px;">
+<style>
+    /* Global dark background */
+    body {
+        background: #0f172a !important;
+        color: #e6eef8;
+        font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
 
-    <h2 class="mb-4 text-danger">Delete Room Type</h2>
+    .delete-container {
+        max-width: 700px;
+        margin: 60px auto;
+        padding: 20px;
+    }
 
-    <div class="card p-3 mb-3">
+    h2 {
+        color: #f87171; /* light red */
+        font-weight: 900;
+        font-size: 2rem;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+    .delete-card {
+        background: rgba(255,255,255,0.04);
+        padding: 22px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.05);
+        box-shadow: 0 8px 26px rgba(0,0,0,0.45);
+        margin-bottom: 25px;
+    }
+
+        .delete-card p {
+            margin: 6px 0;
+            font-size: 1rem;
+        }
+
+        .delete-card strong {
+            color: #dbeafe;
+        }
+
+    /* Buttons */
+    .btn-delete {
+        background: #dc2626;
+        border: none;
+        padding: 12px 25px;
+        font-weight: 800;
+        border-radius: 10px;
+        color: white;
+    }
+
+        .btn-delete:hover {
+            filter: brightness(.9);
+        }
+
+    .btn-cancel {
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.3);
+        padding: 12px 25px;
+        font-weight: 700;
+        border-radius: 10px;
+        color: #e6eef8;
+    }
+
+        .btn-cancel:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+</style>
+
+<div class="delete-container">
+
+    <h2>Delete Room Type</h2>
+
+    <div class="delete-card">
         <p><strong>Name:</strong> @Model.RoomTypeName</p>
         <p><strong>Price:</strong> @Model.Price</p>
         <p><strong>People:</strong> @Model.NumOfPeople</p>
     </div>
 
-    <form asp-action="Delete" asp-route-id="@Model.RoomTypeId" method="post">
-        <button class="btn btn-danger">Yes, Delete</button>
-        <a href="/Admin/RoomType" class="btn btn-secondary">Cancel</a>
+    <form asp-action="Delete" asp-route-id="@Model.RoomTypeId" method="post" class="d-flex gap-3 justify-content-between">
+        <button class="btn-delete" type="submit">Yes, Delete</button>
+        <a href="/Admin/RoomType" class="btn-cancel">Cancel</a>
     </form>
 
 </div>

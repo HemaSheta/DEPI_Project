@@ -3,38 +3,122 @@
     ViewData["Title"] = "Edit Profile";
 }
 
-<div class="container py-4" style="max-width:700px;">
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h3 class="mb-3">Edit Profile</h3>
+<style>
+    /* Background same as Rooms & Details */
+    body {
+        min-height: 100vh;
+        background: #0f172a !important;
+        color: #e6eef8;
+        font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
 
-            <form method="post" asp-action="Edit">
-                <input type="hidden" asp-for="IdentityUserId" />
+    .edit-wrapper {
+        max-width: 650px;
+        margin: 50px auto;
+        padding: 0 20px;
+    }
 
-                <div class="mb-3">
-                    <label class="form-label">First name</label>
-                    <input asp-for="FirstName" class="form-control" />
-                    <span asp-validation-for="FirstName" class="text-danger"></span>
-                </div>
+    /* Card styling */
+    .edit-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
+        padding: 28px;
+        box-shadow: 0 8px 26px rgba(0,0,0,0.45);
+        backdrop-filter: blur(4px);
+    }
 
-                <div class="mb-3">
-                    <label class="form-label">Last name</label>
-                    <input asp-for="LastName" class="form-control" />
-                    <span asp-validation-for="LastName" class="text-danger"></span>
-                </div>
+    .edit-title {
+        font-weight: 900;
+        font-size: 1.7rem;
+        color: #fff;
+        margin-bottom: 20px;
+    }
 
-                <div class="mb-3">
-                    <label class="form-label">Phone</label>
-                    <input asp-for="Phone" class="form-control" />
-                    <span asp-validation-for="Phone" class="text-danger"></span>
-                </div>
+    /* Form inputs */
+    .form-control {
+        background: rgba(255,255,255,0.95);
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 1rem;
+        border: 1px solid rgba(0,0,0,0.1);
+        color: #0b1220;
+    }
 
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">Save</button>
-                    <a href="/Customer/Profile" class="btn btn-outline-secondary">Cancel</a>
-                </div>
-            </form>
-        </div>
+    .form-label {
+        font-weight: 600;
+        color: #dce4f2;
+    }
+
+    /* Buttons */
+    .btn-save {
+        background: linear-gradient(90deg,#3A8DFF,#6CC3FF);
+        border: none;
+        border-radius: 10px;
+        padding: 12px 18px;
+        font-weight: 800;
+        color: white;
+        font-size: 1rem;
+        transition: 0.15s ease-in-out;
+    }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(58,141,255,0.45);
+        }
+
+    .btn-cancel {
+        background: transparent;
+        color: #e2e8f0;
+        border: 1px solid rgba(255,255,255,0.25);
+        border-radius: 10px;
+        padding: 12px 18px;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: 0.15s ease-in-out;
+    }
+
+        .btn-cancel:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+</style>
+
+
+<div class="edit-wrapper">
+    <div class="edit-card">
+
+        <h2 class="edit-title">Edit Profile</h2>
+
+        <form method="post" asp-action="Edit">
+            <input type="hidden" asp-for="IdentityUserId" />
+
+            <div class="mb-3">
+                <label class="form-label">First Name</label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Last Name</label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Phone</label>
+                <input asp-for="Phone" class="form-control" />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-3 mt-4">
+                <button type="submit" class="btn-save">Save Changes</button>
+                <a href="/Customer/Profile" class="btn-cancel">Cancel</a>
+            </div>
+        </form>
+
     </div>
 </div>
 

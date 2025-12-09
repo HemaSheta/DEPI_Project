@@ -4,27 +4,103 @@
     ViewData["Title"] = "Delete Room";
 }
 
-<div class="container mt-4" style="max-width: 900px;">
-    <h2 class="mb-4 text-center fw-bold" style="font-size: 2rem;">Delete Room</h2>
+<style>
+    body {
+        background: #0f172a !important;
+        font-family: 'Inter','Segoe UI',sans-serif;
+        color: #e6eef8;
+        margin: 0;
+    }
 
-    <div class="card shadow-sm p-4 mb-4">
+    .page-wrapper {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 900;
+        text-align: center;
+        margin-bottom: 22px;
+        color: #ffffff;
+    }
+
+    .info-card {
+        background: rgba(255,255,255,0.05);
+        padding: 28px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.06);
+        box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+        backdrop-filter: blur(6px);
+        margin-bottom: 28px;
+    }
+
+        .info-card p {
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+            color: #dbeafe;
+        }
+
+    .image-grid {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        margin-top: 18px;
+    }
+
+    .img-preview {
+        width: 170px;
+        height: 115px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.06);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+        background: #1e293b;
+    }
+
+    .btn-cancel {
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 700;
+        border: 1px solid rgba(255,255,255,0.25);
+        background: rgba(255,255,255,0.85);
+        color: #0f172a;
+    }
+
+    .btn-delete {
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 800;
+        border: none;
+        background: linear-gradient(90deg,#dc2626,#b91c1c);
+        color: #fff;
+        box-shadow: 0 6px 18px rgba(220,38,38,0.4);
+    }
+
+        .btn-delete:hover {
+            background: linear-gradient(90deg,#ef4444,#dc2626);
+            color: #fff;
+        }
+
+</style>
+
+
+<div class="page-wrapper">
+
+    <h2 class="page-title">Delete Room</h2>
+
+    <div class="info-card">
         <p><strong>Room Number:</strong> @Model.RoomNum</p>
         <p><strong>Description:</strong> @Model.Description</p>
 
-        <div class="row text-center mt-3">
-            <div class="col">
-                <img src="@Model.Slide1" width="160" class="rounded shadow-sm" />
-            </div>
-            <div class="col">
-                <img src="@Model.Slide2" width="160" class="rounded shadow-sm" />
-            </div>
-            <div class="col">
-                <img src="@Model.Slide3" width="160" class="rounded shadow-sm" />
-            </div>
+        <div class="image-grid">
+            <img src="@Model.Slide1" class="img-preview" />
+            <img src="@Model.Slide2" class="img-preview" />
+            <img src="@Model.Slide3" class="img-preview" />
         </div>
     </div>
 
-    <!-- FIXED: Correct Route -->
     <form method="post"
           asp-controller="Room"
           asp-action="Delete"
@@ -34,9 +110,9 @@
         <input type="hidden" asp-for="RoomId" />
 
         <div class="d-flex justify-content-between">
-            <a href="/Admin/Room" class="btn btn-secondary px-4">Cancel</a>
-            <button class="btn btn-danger px-4" type="submit">Yes, Delete</button>
+            <a href="/Admin/Room" class="btn btn-cancel">Cancel</a>
+            <button type="submit" class="btn btn-delete">Yes, Delete</button>
         </div>
-
     </form>
+
 </div>

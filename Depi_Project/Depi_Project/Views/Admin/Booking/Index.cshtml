@@ -4,120 +4,182 @@
     ViewData["Title"] = "Bookings (Admin)";
     var rooms = ViewBag.Rooms as List<Depi_Project.Models.Room> ?? new List<Depi_Project.Models.Room>();
     var paymentStatuses = ViewBag.PaymentStatuses as List<string> ?? new List<string>();
+    var selectedRoomId = ViewBag.RoomId as int?;
+    var selectedPayment = ViewBag.PaymentStatus as string ?? "";
 }
 
 <style>
+    /* Page background similar to other pages */
+    body {
+        background: #0f172a;
+        color: #e6eef8;
+    }
+
     .admin-container {
-        max-width: 1100px;
-        margin: 0 auto;
+        max-width: 1150px;
+        margin: 28px auto;
+        padding: 0 16px;
+    }
+
+    h2.page-title {
+        font-size: 1.7rem;
+        font-weight: 900;
+        color: #ffffff;
+        margin-bottom: 18px;
     }
 
     .filter-card {
-        background: #ffffff;
+        background: rgba(255,255,255,0.04);
         padding: 18px;
         border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        margin-bottom: 25px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+        border: 1px solid rgba(255,255,255,0.04);
+        margin-bottom: 20px;
+        color: #e6eef8;
+    }
+
+    .filter-card .form-label {
+        color: #cbd5e1;
+        font-weight: 600;
+    }
+
+    .filter-card .form-control,
+    .filter-card .form-select,
+    .filter-card input[type="date"],
+    .filter-card input[type="text"] {
+        border-radius: 10px;
+        background: #fff;
+        color: #0b1220;
+    }
+
+    .filter-row {
+        gap: 10px;
     }
 
     .admin-table {
-        background: white;
+        background: rgba(255,255,255,0.03);
         border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 4px 18px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+        border: 1px solid rgba(255,255,255,0.04);
     }
 
-    .badge-paid {
-        background: #28a745 !important;
-        color: white;
+    table.bookings-table {
+        margin-bottom: 0;
+        color: #e6eef8;
+        border-collapse: separate;
+        border-spacing: 0;
     }
 
-    .badge-notpaid {
-        background: #dc3545 !important;
-        color: white;
+    table.bookings-table thead th {
+        background: rgba(15,23,42,0.95);
+        color: #fff;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
     }
 
-    .badge-approved {
-        background: #198754 !important;
-        color: white;
+    table.bookings-table tbody tr {
+        background: rgba(255,255,255,0.01);
     }
 
-    .badge-pending {
-        background: #ffc107 !important;
-        color: #000;
+    table.bookings-table tbody tr td,
+    table.bookings-table thead th {
+        vertical-align: middle;
+        padding: 12px 10px;
     }
 
-    .badge-canceled {
-        background: #dc3545 !important;
-        color: white;
+    .text-muted.small {
+        color: rgba(230,238,248,0.7) !important;
     }
 
+    /* badges */
+    .badge-paid { background: #28a745; color: #fff; }
+    .badge-notpaid { background: #dc3545; color: #fff; }
+    .badge-approved { background: #198754; color: #fff; }
+    .badge-pending { background: #ffc107; color: #000; }
+    .badge-canceled { background: #dc3545; color: #fff; }
+
+    /* actions */
     .btn-small {
-        padding: 3px 8px;
-        font-size: 0.85rem;
+        padding: 6px 8px;
+        font-size: 0.82rem;
+        border-radius: 8px;
+        min-width: 66px;
     }
 
+    .btn-outline-primary { color: #0f172a; background: #fff; border-color: rgba(255,255,255,0.06); }
+    .btn-outline-warning { color: #0f172a; background: #fff3cd; border-color: rgba(255,255,255,0.06); }
+    .btn-outline-danger { color: #fff; background: transparent; border-color: rgba(255,255,255,0.06); }
+
+    /* responsive tweaks */
+    @@media (max-width: 900px) {
+        .filter-card .col-md-3, .filter-card .col-md-2, .filter-card .col-md-1 { flex: 0 0 100%; max-width: 100%; }
+        .filter-card .row { margin-bottom: 6px; }
+        table.bookings-table thead { display: none; }
+        table.bookings-table tbody tr { display: block; margin-bottom: 12px; border-radius: 10px; padding: 10px; background: rgba(255,255,255,0.02); }
+        table.bookings-table tbody td { display: flex; justify-content: space-between; padding: 6px 8px; }
+    }
 </style>
 
-<div class="admin-container py-4">
+<div class="admin-container">
 
-    <h2 class="fw-bold mb-3">Bookings (Admin)</h2>
+    <h2 class="page-title">Bookings (Admin)</h2>
 
     <!-- FILTERS -->
     <div class="filter-card">
-        <form method="get" class="row g-2">
-            <div class="col-md-3">
-                <label class="form-label">Search (Email / Phone)</label>
-                <input name="search" class="form-control" placeholder="Search..." value="@ViewBag.Search" />
-            </div>
+        <form method="get">
+            <div class="row filter-row g-2">
+                <div class="col-md-4">
+                    <label class="form-label">Search (Email / Phone)</label>
+                    <input name="search" class="form-control" placeholder="Search by email or phone..." value="@ViewBag.Search" />
+                </div>
 
-            <div class="col-md-2">
-                <label class="form-label">From</label>
-                <input name="from" type="date" class="form-control" value="@ViewBag.From" />
-            </div>
+                <div class="col-md-2">
+                    <label class="form-label">From</label>
+                    <input name="from" type="date" class="form-control" value="@ViewBag.From" />
+                </div>
 
-            <div class="col-md-2">
-                <label class="form-label">To</label>
-                <input name="to" type="date" class="form-control" value="@ViewBag.To" />
-            </div>
+                <div class="col-md-2">
+                    <label class="form-label">To</label>
+                    <input name="to" type="date" class="form-control" value="@ViewBag.To" />
+                </div>
 
-            <div class="col-md-2">
-                <label class="form-label">Room</label>
-                <select name="roomId" class="form-select">
-                    <option value="">All</option>
-                    @foreach (var r in rooms)
-                    {
-                        <option value="@r.RoomId" @@(ViewBag.RoomId !=null && ViewBag.RoomId= =r.RoomId ? "selected" : "" )>
-                            Room @r.RoomNum (@r.RoomType?.RoomTypeName)
-                        </option>
-                    }
-                </select>
-            </div>
+                <div class="col-md-2">
+                    <label class="form-label">Room</label>
+                    <select name="roomId" class="form-select">
+                        <option value="">All</option>
+                        @foreach (var r in rooms)
+                        {
+                            <option value="@r.RoomId" @@(selectedRoomId.HasValue && selectedRoomId.Value == r.RoomId ? "selected" : "")>
+                                Room @r.RoomNum (@r.RoomType?.RoomTypeName)
+                            </option>
+                        }
+                    </select>
+                </div>
 
-            <div class="col-md-2">
-                <label class="form-label">Payment</label>
-                <select name="paymentStatus" class="form-select">
-                    <option value="">All</option>
-                    @foreach (var ps in paymentStatuses)
-                    {
-                        <option value="@ps" @@(ps= =(ViewBag.PaymentStatus ?? "" ) ? "selected" : "" )>@ps</option>
-                    }
-                </select>
-            </div>
+                <div class="col-md-2">
+                    <label class="form-label">Payment</label>
+                    <select name="paymentStatus" class="form-select">
+                        <option value="">All</option>
+                        @foreach (var ps in paymentStatuses)
+                        {
+                            <option value="@ps" @@(string.Equals(ps, selectedPayment, StringComparison.OrdinalIgnoreCase) ? "selected" : "")>@ps</option>
+                        }
+                    </select>
+                </div>
 
-            <div class="col-md-1 d-flex align-items-end">
-                <button class="btn btn-primary w-100">Filter</button>
+                <div class="col-12 col-md-2 d-flex align-items-end">
+                    <button class="btn btn-primary w-100">Filter</button>
+                </div>
             </div>
         </form>
     </div>
 
-
     <!-- BOOKINGS TABLE -->
     <div class="admin-table">
-        <table class="table table-striped table-hover align-middle text-center">
-            <thead class="table-dark">
+        <table class="table bookings-table table-hover align-middle text-center">
+            <thead>
                 <tr>
-                    <th>#</th>
+                    <th style="width:60px;">#</th>
                     <th>Room</th>
                     <th>Customer</th>
                     <th>Check-In</th>
@@ -136,22 +198,22 @@
                     var p = item.Profile;
 
                     <tr>
-                        <td>@b.BookingId</td>
+                        <td class="text-muted small">@b.BookingId</td>
 
-                        <td>
+                        <td class="text-start">
                             @if (b.Room != null)
                             {
-                                <div>Room @b.Room.RoomNum</div>
+                                <div style="font-weight:700; color:#fff;">Room @b.Room.RoomNum</div>
                                 <div class="text-muted small">@b.Room.RoomType?.RoomTypeName</div>
                             }
                             else
                             {
-                                <div>Room @b.RoomId</div>
+                                <div style="color:#fff;">Room @b.RoomId</div>
                             }
                         </td>
 
-                        <td>
-                            <div>@item.Email</div>
+                        <td class="text-start">
+                            <div style="color:#fff;">@item.Email</div>
                             @if (p != null)
                             {
                                 <div class="text-muted small">@p.FirstName @p.LastName</div>
@@ -165,11 +227,11 @@
                         <td>@b.TotalPrice.ToString("F2")</td>
 
                         <td>
-                            @if (b.PaymentStatus == "Paid")
+                            @if (string.Equals(b.PaymentStatus, "Paid", StringComparison.OrdinalIgnoreCase))
                             {
                                 <span class="badge badge-paid">Paid</span>
                             }
-                            else if (b.PaymentStatus == "Pending")
+                            else if (string.Equals(b.PaymentStatus, "Pending", StringComparison.OrdinalIgnoreCase))
                             {
                                 <span class="badge badge-pending">Pending</span>
                             }
@@ -180,11 +242,11 @@
                         </td>
 
                         <td>
-                            @if (b.Status == "Approved")
+                            @if (string.Equals(b.Status, "Approved", StringComparison.OrdinalIgnoreCase))
                             {
                                 <span class="badge badge-approved">Approved</span>
                             }
-                            else if (b.Status == "Pending")
+                            else if (string.Equals(b.Status, "Pending", StringComparison.OrdinalIgnoreCase))
                             {
                                 <span class="badge badge-pending">Pending</span>
                             }
@@ -195,16 +257,15 @@
                         </td>
 
                         <td>
-                            <a class="btn btn-outline-primary btn-sm btn-small"
-                               href="/Admin/Booking/Details/@b.BookingId">Details</a>
+                            <div class="d-flex justify-content-center gap-2">
+                                <a class="btn btn-outline-primary btn-small" href="/Admin/Booking/Details/@b.BookingId">Details</a>
 
-                            <a class="btn btn-outline-warning btn-sm btn-small"
-                               href="/Admin/Booking/EditPayment/@b.BookingId">Edit</a>
+                                <a class="btn btn-outline-warning btn-small" href="/Admin/Booking/EditPayment/@b.BookingId">Edit</a>
 
-                            @* Cancel form (soft cancel) *@
-                            <form asp-controller="Booking" asp-action="Cancel" asp-route-id="@b.BookingId" method="post" style="display:inline-block;" onsubmit="return confirm('Cancel this booking?');">
-                                <button class="btn btn-outline-danger btn-sm btn-small" type="submit">Cancel</button>
-                            </form>
+                                <form asp-controller="Booking" asp-action="Cancel" asp-route-id="@b.BookingId" method="post" style="display:inline-block; margin:0;">
+                                    <button class="btn btn-outline-danger btn-small" type="submit" onclick="return confirm('Cancel this booking?');">Cancel</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 }

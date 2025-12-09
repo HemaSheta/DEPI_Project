@@ -4,33 +4,108 @@
     ViewData["Title"] = "Edit Room Type";
 }
 
-<div class="container mt-4" style="max-width: 700px;">
+<style>
+    /* Global dark background */
+    body {
+        background: #0f172a !important;
+        color: #e6eef8;
+        font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
 
-    <h2 class="mb-4">Edit Room Type</h2>
+    .edit-container {
+        max-width: 700px;
+        margin: 50px auto;
+        padding: 20px;
+    }
 
-    <form asp-action="Edit" asp-route-id="@Model.RoomTypeId" method="post">
-        <input type="hidden" asp-for="RoomTypeId" />
+    .edit-card {
+        background: rgba(255,255,255,0.04);
+        padding: 25px;
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+        border: 1px solid rgba(255,255,255,0.06);
+    }
 
-        <div class="mb-3">
-            <label>Room Type Name</label>
-            <input asp-for="RoomTypeName" class="form-control" />
-            <span asp-validation-for="RoomTypeName" class="text-danger"></span>
-        </div>
+    h2 {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: #ffffff;
+        margin-bottom: 20px;
+    }
 
-        <div class="mb-3">
-            <label>Price</label>
-            <input asp-for="Price" class="form-control" />
-            <span asp-validation-for="Price" class="text-danger"></span>
-        </div>
+    label {
+        font-weight: 600;
+        color: #dbeafe;
+        margin-bottom: 5px;
+    }
 
-        <div class="mb-3">
-            <label>Number of People</label>
-            <input asp-for="NumOfPeople" class="form-control" />
-            <span asp-validation-for="NumOfPeople" class="text-danger"></span>
-        </div>
+    .form-control {
+        border-radius: 10px;
+        padding: 12px;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: #ffffff;
+        color: #0b1220;
+        font-weight: 500;
+    }
 
-        <button class="btn btn-warning">Save Changes</button>
-        <a href="/Admin/RoomType" class="btn btn-secondary">Cancel</a>
-    </form>
+    .btn-save {
+        background: #f59e0b;
+        border: none;
+        color: #111;
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-weight: 800;
+        margin-right: 8px;
+    }
 
+        .btn-save:hover {
+            filter: brightness(.92);
+        }
+
+    .btn-cancel {
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.3);
+        color: #e6eef8;
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-weight: 700;
+    }
+
+        .btn-cancel:hover {
+            background: rgba(255,255,255,0.08);
+        }
+</style>
+
+<div class="edit-container">
+    <h2>Edit Room Type</h2>
+
+    <div class="edit-card">
+        <form asp-action="Edit" asp-route-id="@Model.RoomTypeId" method="post">
+
+            <input type="hidden" asp-for="RoomTypeId" />
+
+            <div class="mb-3">
+                <label>Room Type Name</label>
+                <input asp-for="RoomTypeName" class="form-control" />
+                <span asp-validation-for="RoomTypeName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label>Price</label>
+                <input asp-for="Price" class="form-control" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label>Number of People</label>
+                <input asp-for="NumOfPeople" class="form-control" />
+                <span asp-validation-for="NumOfPeople" class="text-danger"></span>
+            </div>
+
+            <button class="btn-save" type="submit">Save Changes</button>
+            <a href="/Admin/RoomType" class="btn-cancel">Cancel</a>
+        </form>
+    </div>
 </div>
