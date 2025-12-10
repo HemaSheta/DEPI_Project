@@ -121,5 +121,20 @@ namespace Depi_Project.Services.Implementations
 
             return list;
         }
+
+        // ======================
+        // Check if room number exists (optionally exclude a room id)
+        // ======================
+        public bool RoomNumberExists(int roomNum, int? excludeRoomId = null)
+        {
+            if (excludeRoomId.HasValue)
+            {
+                return _context.Rooms.Any(r => r.RoomNum == roomNum && r.RoomId != excludeRoomId.Value);
+            }
+            else
+            {
+                return _context.Rooms.Any(r => r.RoomNum == roomNum);
+            }
+        }
     }
 }

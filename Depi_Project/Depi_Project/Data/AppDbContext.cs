@@ -50,6 +50,22 @@ namespace Depi_Project.Data
                 .WithMany()
                 .HasForeignKey(up => up.IdentityUserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // ---------------------------
+            // Unique index: RoomNum must be unique
+            // ---------------------------
+            builder.Entity<Room>()
+                .HasIndex(r => r.RoomNum)
+                .IsUnique()
+                .HasDatabaseName("IX_Room_RoomNum_Unique");
+
+            // ---------------------------
+            // Unique index: RoomTypeName must be unique (case-insensitive on SQL Server)
+            // ---------------------------
+            builder.Entity<RoomType>()
+                .HasIndex(rt => rt.RoomTypeName)
+                .IsUnique()
+                .HasDatabaseName("IX_RoomType_RoomTypeName_Unique");
         }
     }
 }

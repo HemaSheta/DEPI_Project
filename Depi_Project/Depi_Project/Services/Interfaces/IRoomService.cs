@@ -21,5 +21,8 @@ namespace Depi_Project.Services.Interfaces
             float? maxPrice,
             int? persons,
             string? search);
+
+        // Check if a room number already exists (optionally excluding a room id for edits)
+        bool RoomNumberExists(int roomNum, int? excludeRoomId = null);
     }
 }

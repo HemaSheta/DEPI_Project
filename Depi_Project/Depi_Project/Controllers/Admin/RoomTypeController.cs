@@ -1,4 +1,5 @@
-﻿using Depi_Project.Models;
+﻿// Controllers/Admin/RoomTypeController.cs
+using Depi_Project.Models;
 using Depi_Project.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,8 +21,8 @@ namespace Depi_Project.Controllers.Admin
         [HttpGet("")]
         public IActionResult Index()
         {
-            var types = _roomTypeService.GetAllRoomTypes();
-            return View("~/Views/Admin/RoomType/Index.cshtml", types);
+            var list = _roomTypeService.GetAllRoomTypes();
+            return View("~/Views/Admin/RoomType/Index.cshtml", list);
         }
 
         [HttpGet("Create")]
@@ -32,51 +33,68 @@ namespace Depi_Project.Controllers.Admin
 
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(RoomType roomType)
+        public IActionResult Create(RoomType model)
         {
-            if (ModelState.IsValid)
+            // basic model validation
+            if (!ModelState.IsValid)
             {
-                _roomTypeService.CreateRoomType(roomType);
-                return RedirectToAction("Index");
+                return View("~/Views/Admin/RoomType/Create.cshtml", model);
             }
 
-            return View("~/Views/Admin/RoomType/Create.cshtml", roomType);
+            // uniqueness check (case-insensitive)
+            if (_roomTypeService.RoomTypeNameExists(model.RoomTypeName))
+            {
+                ModelState.AddModelError(nameof(model.RoomTypeName), "This room type name already exists.");
+                return View("~/Views/Admin/RoomType/Create.cshtml", model);
+            }
+
+            _roomTypeService.CreateRoomType(model);
+            TempData["Success"] = "Room type created.";
+            return Redirect("/Admin/RoomType");
         }
 
         [HttpGet("Edit/{id}")]
         public IActionResult Edit(int id)
         {
-            var type = _roomTypeService.GetRoomTypeById(id);
-            if (type == null)
-                return NotFound();
-
-            return View("~/Views/Admin/RoomType/Edit.cshtml", type);
+            var rt = _roomTypeService.GetRoomTypeById(id);
+            if (rt == null) return NotFound();
+            return View("~/Views/Admin/RoomType/Edit.cshtml", rt);
         }
 
         [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, RoomType roomType)
+        public IActionResult Edit(int id, RoomType model)
         {
-            if (id != roomType.RoomTypeId)
-                return BadRequest();
-
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _roomTypeService.UpdateRoomType(roomType);
-                return RedirectToAction("Index");
+                return View("~/Views/Admin/RoomType/Edit.cshtml", model);
             }
 
-            return View("~/Views/Admin/RoomType/Edit.cshtml", roomType);
+            // uniqueness check excluding current id
+            if (_roomTypeService.RoomTypeNameExists(model.RoomTypeName, id))
+            {
+                ModelState.AddModelError(nameof(model.RoomTypeName), "This room type name already exists.");
+                return View("~/Views/Admin/RoomType/Edit.cshtml", model);
+            }
+
+            var exists = _roomTypeService.GetRoomTypeById(id);
+            if (exists == null) return NotFound();
+
+            exists.RoomTypeName = model.RoomTypeName;
+            exists.Price = model.Price;
+            exists.NumOfPeople = model.NumOfPeople;
+
+            _roomTypeService.UpdateRoomType(exists);
+            TempData["Success"] = "Room type updated.";
+            return Redirect("/Admin/RoomType");
         }
 
         [HttpGet("Delete/{id}")]
         public IActionResult Delete(int id)
         {
-            var type = _roomTypeService.GetRoomTypeById(id);
-            if (type == null)
-                return NotFound();
-
-            return View("~/Views/Admin/RoomType/Delete.cshtml", type);
+            var rt = _roomTypeService.GetRoomTypeById(id);
+            if (rt == null) return NotFound();
+            return View("~/Views/Admin/RoomType/Delete.cshtml", rt);
         }
 
         [HttpPost("Delete/{id}")]
@@ -84,7 +102,8 @@ namespace Depi_Project.Controllers.Admin
         public IActionResult DeleteConfirmed(int id)
         {
             _roomTypeService.DeleteRoomType(id);
-            return RedirectToAction("Index");
+            TempData["Success"] = "Room type deleted.";
+            return Redirect("/Admin/RoomType");
         }
     }
 }

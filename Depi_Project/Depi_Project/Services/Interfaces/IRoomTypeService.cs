@@ -1,4 +1,5 @@
-﻿using Depi_Project.Models;
+﻿// Services/Interfaces/IRoomTypeService.cs
+using Depi_Project.Models;
 
 namespace Depi_Project.Services.Interfaces
 {
@@ -9,5 +10,8 @@ namespace Depi_Project.Services.Interfaces
         void CreateRoomType(RoomType roomType);
         void UpdateRoomType(RoomType roomType);
         void DeleteRoomType(int id);
+
+        // check uniqueness (optionally exclude an id when editing)
+        bool RoomTypeNameExists(string name, int? excludeId = null);
     }
 }

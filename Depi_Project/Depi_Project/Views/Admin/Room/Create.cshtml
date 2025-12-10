@@ -4,6 +4,8 @@
     ViewData["Title"] = "Create Room";
 }
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
 <style>
     /* PAGE BACKGROUND */
     body {
@@ -25,23 +27,26 @@
         font-weight: 900;
         text-align: center;
         color: #fff;
-        margin-bottom: 25px;
+        margin-bottom: 18px;
     }
 
     /* CARD STYLING (glass effect) */
     .form-card {
-        background: rgba(255,255,255,0.05);
-        padding: 28px;
+        background: rgba(255,255,255,0.03);
+        padding: 24px;
         border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.08);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+        border: 1px solid rgba(255,255,255,0.06);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.45);
         backdrop-filter: blur(6px);
+        color: #e6eef8;
     }
 
     /* LABEL + INPUT STYLING */
     .form-label {
         font-weight: 600;
         color: #dbeafe;
+        display: block;
+        margin-bottom: 6px;
     }
 
     .form-control, .form-select {
@@ -55,6 +60,7 @@
         .form-control:focus, .form-select:focus {
             border-color: #3A8DFF;
             box-shadow: 0 0 8px rgba(58,141,255,0.6);
+            outline: none;
         }
 
     /* BUTTONS */
@@ -69,7 +75,7 @@
     }
 
         .btn-create:hover {
-            opacity: .9;
+            opacity: .95;
             transform: translateY(-2px);
         }
 
@@ -77,40 +83,46 @@
         border-radius: 10px;
         padding: 12px 26px;
         font-weight: 700;
+        color: #0f172a;
+        background: rgba(255,255,255,0.9);
+        border: 1px solid rgba(255,255,255,0.06);
     }
 
-    .alert-danger {
-        border-radius: 10px;
-        font-size: 0.95rem;
+    .validation-summary-errors {
+        background: rgba(255,0,0,0.04);
+        border: 1px solid rgba(255,0,0,0.12);
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        color: #ffdede;
+    }
+
+    .field-validation-error {
+        color: #ffdede;
+        margin-top: 6px;
+        display: block;
+    }
+
+    .note-muted {
+        font-size: 0.92rem;
+        color: rgba(230,238,248,0.75);
     }
 </style>
-
 
 <div class="page-wrapper">
     <h2 class="page-title">Create Room</h2>
 
-    @if (!ViewData.ModelState.IsValid)
-    {
-        <ul class="alert alert-danger">
-            @foreach (var state in ViewData.ModelState)
-            {
-                foreach (var error in state.Value.Errors)
-                {
-                    <li><strong>@state.Key</strong>: @error.ErrorMessage</li>
-                }
-            }
-        </ul>
-    }
-
     <div class="form-card">
-        <form asp-action="Create" method="post" enctype="multipart/form-data">
+        <!-- Validation summary (shows ModelState errors including controller-level uniqueness checks) -->
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
 
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
             <!-- ROOM NUMBER -->
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Room Number</label>
                     <input asp-for="RoomNum" class="form-control" />
-                    <span asp-validation-for="RoomNum" class="text-danger"></span>
+                    <span asp-validation-for="RoomNum" class="field-validation-error"></span>
                 </div>
             </div>
 
@@ -118,7 +130,7 @@
             <div class="mb-3">
                 <label class="form-label">Description</label>
                 <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
+                <span asp-validation-for="Description" class="field-validation-error"></span>
             </div>
 
             <!-- ROOM TYPE -->
@@ -130,7 +142,7 @@
                         <option value="@type.RoomTypeId">@type.RoomTypeName</option>
                     }
                 </select>
-                <span asp-validation-for="RoomTypeId" class="text-danger"></span>
+                <span asp-validation-for="RoomTypeId" class="field-validation-error"></span>
             </div>
 
             <!-- IMAGE UPLOADS -->
@@ -151,15 +163,13 @@
                 </div>
             </div>
 
-            <!-- BUTTONS -->
             <div class="d-flex justify-content-between mt-4">
-                <a href="/Admin/Room" class="btn btn-secondary btn-cancel">Cancel</a>
-                <button class="btn btn-success btn-create" type="submit">Create</button>
+                <a href="/Admin/Room" class="btn btn-cancel">Cancel</a>
+                <button class="btn btn-create" type="submit">Create</button>
             </div>
         </form>
     </div>
 </div>
-
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

@@ -4,113 +4,112 @@
     ViewData["Title"] = "Create Room Type";
 }
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
 <style>
-    /* Global dark background */
     body {
         background: #0f172a !important;
         color: #e6eef8;
         font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
         margin: 0;
-        padding: 0;
     }
 
-    .create-container {
-        max-width: 700px;
-        margin: 50px auto;
-        padding: 20px;
+    .page-wrapper {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 18px;
     }
 
-    .create-card {
-        background: rgba(255,255,255,0.04);
-        padding: 28px;
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.06);
-        box-shadow: 0 8px 26px rgba(0,0,0,0.45);
-    }
-
-    h2 {
-        color: #ffffff;
-        font-weight: 900;
+    .page-title {
         font-size: 2rem;
-        margin-bottom: 28px;
+        font-weight: 900;
         text-align: center;
+        color: #fff;
+        margin-bottom: 18px;
     }
 
-    label {
-        font-weight: 600;
+    .card-panel {
+        background: rgba(255,255,255,0.03);
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.06);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+    }
+
+    .form-label {
         color: #dbeafe;
-        margin-bottom: 6px;
+        font-weight: 700;
     }
 
     .form-control {
         border-radius: 10px;
-        padding: 12px;
-        border: 1px solid rgba(255,255,255,0.1);
-        background: #ffffff;
+        padding: 10px;
+        background: rgba(255,255,255,0.95);
         color: #0b1220;
-        font-weight: 500;
+        border: 1px solid #e6eef8;
     }
 
-    /* Buttons */
     .btn-create {
-        background: #10b981; /* Green */
-        border: none;
+        background: linear-gradient(90deg,#3A8DFF,#6CC3FF);
         color: white;
-        padding: 12px 26px;
-        font-weight: 800;
+        border: none;
+        padding: 10px 16px;
+        font-weight: 900;
         border-radius: 10px;
     }
-
-        .btn-create:hover {
-            filter: brightness(.92);
-        }
 
     .btn-cancel {
-        background: transparent;
-        border: 1px solid rgba(255,255,255,0.3);
-        color: #e6eef8;
-        padding: 12px 26px;
-        font-weight: 700;
         border-radius: 10px;
+        padding: 10px 16px;
+        font-weight: 700;
     }
 
-        .btn-cancel:hover {
-            background: rgba(255,255,255,0.08);
-        }
+    .validation-summary-errors {
+        background: rgba(255,0,0,0.06);
+        border: 1px solid rgba(255,0,0,0.12);
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        color: #ffdede;
+    }
+
+    .field-validation-error {
+        color: #ffdede;
+        margin-top: 6px;
+    }
 </style>
 
-<div class="create-container">
-    <h2>Create Room Type</h2>
+<div class="page-wrapper">
+    <h2 class="page-title">Create Room Type</h2>
 
-    <div class="create-card">
+    <div class="card-panel">
+        @* validation summary *@
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
 
         <form asp-action="Create" method="post">
-
             <div class="mb-3">
-                <label>Room Type Name</label>
+                <label class="form-label">Room Type Name</label>
                 <input asp-for="RoomTypeName" class="form-control" />
-                <span asp-validation-for="RoomTypeName" class="text-danger"></span>
+                <span asp-validation-for="RoomTypeName" class="field-validation-error"></span>
             </div>
 
             <div class="mb-3">
-                <label>Price (EGP)</label>
+                <label class="form-label">Price (EGP)</label>
                 <input asp-for="Price" class="form-control" />
-                <span asp-validation-for="Price" class="text-danger"></span>
+                <span asp-validation-for="Price" class="field-validation-error"></span>
             </div>
 
             <div class="mb-3">
-                <label>Number of People</label>
+                <label class="form-label">Number of People</label>
                 <input asp-for="NumOfPeople" class="form-control" />
-                <span asp-validation-for="NumOfPeople" class="text-danger"></span>
+                <span asp-validation-for="NumOfPeople" class="field-validation-error"></span>
             </div>
 
-            <div class="d-flex justify-content-between mt-4">
-                <a href="/Admin/RoomType" class="btn-cancel">Cancel</a>
-                <button class="btn-create" type="submit">Create</button>
+            <div class="d-flex justify-content-between mt-3">
+                <a href="/Admin/RoomType" class="btn btn-secondary btn-cancel">Cancel</a>
+                <button class="btn btn-create" type="submit">Create</button>
             </div>
-
         </form>
-
     </div>
 </div>
 

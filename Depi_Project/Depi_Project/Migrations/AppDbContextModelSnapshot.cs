@@ -98,6 +98,10 @@ namespace Depi_Project.Migrations
 
                     b.HasKey("RoomId");
 
+                    b.HasIndex("RoomNum")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Room_RoomNum_Unique");
+
                     b.HasIndex("RoomTypeId");
 
                     b.ToTable("Rooms");
@@ -123,6 +127,10 @@ namespace Depi_Project.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("RoomTypeId");
+
+                    b.HasIndex("RoomTypeName")
+                        .IsUnique()
+                        .HasDatabaseName("IX_RoomType_RoomTypeName_Unique");
 
                     b.ToTable("RoomTypes");
                 });
