@@ -33,9 +33,9 @@ namespace Depi_Project.Controllers.Admin
         }
 
         // GET: /Admin/Booking
-        // Optional parameters: search (email or phone), from, to, roomId, paymentStatus
+        // Optional parameters: search (email or phone), from, to, roomId, paymentStatus, status
         [HttpGet("")]
-        public IActionResult Index(string? search, string? from, string? to, int? roomId, string? paymentStatus)
+        public IActionResult Index(string? search, string? from, string? to, int? roomId, string? paymentStatus, string? status)
         {
             DateTime? dtFrom = null, dtTo = null;
             if (!string.IsNullOrWhiteSpace(from) && DateTime.TryParse(from, out var tmpf)) dtFrom = tmpf.Date;
@@ -81,6 +81,13 @@ namespace Depi_Project.Controllers.Admin
                 q = q.Where(bk => bk.PaymentStatus == ps);
             }
 
+            // NEW: Filter by booking workflow status (Approved | Canceled | Pending)
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                var st = status.Trim();
+                q = q.Where(bk => bk.Status == st);
+            }
+
             // Search by email or phone
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -112,12 +119,14 @@ namespace Depi_Project.Controllers.Admin
             // Prepare filter dropdowns/lists for the view
             ViewBag.Rooms = _unitOfWork.Rooms.GetAll().ToList();
             ViewBag.PaymentStatuses = new List<string> { "Paid", "Not Paid", "Pending" };
+            ViewBag.Statuses = new List<string> { "Pending", "Approved", "Canceled" };
 
             ViewBag.Search = search ?? "";
             ViewBag.From = dtFrom?.ToString("yyyy-MM-dd") ?? "";
             ViewBag.To = dtTo?.ToString("yyyy-MM-dd") ?? "";
             ViewBag.RoomId = roomId;
             ViewBag.PaymentStatus = paymentStatus ?? "";
+            ViewBag.Status = status ?? "";
 
             // Return the view model list
             return View("~/Views/Admin/Booking/Index.cshtml", vm);

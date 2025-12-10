@@ -6,6 +6,7 @@
     var paymentStatuses = ViewBag.PaymentStatuses as List<string> ?? new List<string>();
     var selectedRoomId = ViewBag.RoomId as int?;
     var selectedPayment = ViewBag.PaymentStatus as string ?? "";
+    var selectedStatus = ViewBag.Status as string ?? "";
 }
 
 <style>
@@ -13,6 +14,7 @@
     body {
         background: #0f172a;
         color: #e6eef8;
+        font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
     }
 
     .admin-container {
@@ -69,26 +71,38 @@
         color: #e6eef8;
         border-collapse: separate;
         border-spacing: 0;
+        width: 100%;
     }
 
     table.bookings-table thead th {
         background: rgba(15,23,42,0.95);
         color: #fff;
         border-bottom: 1px solid rgba(255,255,255,0.04);
+        padding: 12px 10px;
     }
 
     table.bookings-table tbody tr {
         background: rgba(255,255,255,0.01);
+        transition: background-color .12s ease;
     }
 
-    table.bookings-table tbody tr td,
-    table.bookings-table thead th {
+    table.bookings-table tbody tr:nth-child(odd) {
+        background: rgba(255,255,255,0.03);
+    }
+
+    table.bookings-table tbody tr:hover {
+        background: rgba(255,255,255,0.12);
+    }
+
+    table.bookings-table td,
+    table.bookings-table th {
         vertical-align: middle;
         padding: 12px 10px;
+        color: #ffffff !important;
     }
 
     .text-muted.small {
-        color: rgba(230,238,248,0.7) !important;
+        color: rgba(230,238,248,0.75) !important;
     }
 
     /* badges */
@@ -164,6 +178,17 @@
                         {
                             <option value="@ps" @@(string.Equals(ps, selectedPayment, StringComparison.OrdinalIgnoreCase) ? "selected" : "")>@ps</option>
                         }
+                    </select>
+                </div>
+
+                <!-- NEW: STATUS FILTER -->
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All</option>
+                        <option value="Pending" @@(string.Equals(selectedStatus, "Pending", StringComparison.OrdinalIgnoreCase) ? "selected" : "")>Pending</option>
+                        <option value="Approved" @@(string.Equals(selectedStatus, "Approved", StringComparison.OrdinalIgnoreCase) ? "selected" : "")>Approved</option>
+                        <option value="Canceled" @@(string.Equals(selectedStatus, "Canceled", StringComparison.OrdinalIgnoreCase) ? "selected" : "")>Canceled</option>
                     </select>
                 </div>
 

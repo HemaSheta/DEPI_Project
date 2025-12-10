@@ -19,7 +19,6 @@
         padding-top: 30px;
     }
 
-    /* --- PROFILE CARD --- */
     .profile-card, .summary-card, .table-card {
         background: rgba(255,255,255,0.04);
         border: 1px solid rgba(255,255,255,0.06);
@@ -42,20 +41,40 @@
         margin-bottom: 10px;
     }
 
+    /* ------------------------------------------ */
+    /* TABLE FIXES — MAKE ALL TEXT WHITE          */
+    /* ------------------------------------------ */
+
     .table {
-        color: #fff;
+        color: #ffffff !important;
         border-color: rgba(255,255,255,0.1);
     }
 
+        .table td,
         .table th {
-            background: rgba(255,255,255,0.08);
-            color: #dbeafe;
-            font-weight: 700;
+            color: #ffffff !important;
         }
 
-        .table td {
-            background: rgba(255,255,255,0.02);
-        }
+    /* Custom row striping for dark mode */
+    .table-striped tbody tr:nth-child(odd) {
+        background-color: rgba(255,255,255,0.04) !important;
+    }
+
+    .table-striped tbody tr:nth-child(even) {
+        background-color: rgba(255,255,255,0.08) !important;
+    }
+
+    /* Hover effect */
+    .table-hover tbody tr:hover {
+        background-color: rgba(255,255,255,0.15) !important;
+        color: #ffffff !important;
+    }
+
+    /* Table headers */
+    .table thead th {
+        background: rgba(255,255,255,0.12) !important;
+        color: #dbeafe !important;
+    }
 
     .badge {
         padding: 6px 10px;
@@ -77,19 +96,8 @@
         background: #ef4444 !important;
     }
 
-    /* Buttons */
-    .btn-outline-primary {
-        border-radius: 10px;
-        font-weight: 700;
-        padding: 6px 14px;
-    }
-
-    .btn-outline-secondary {
-        border-radius: 10px;
-        font-weight: 700;
-        padding: 6px 14px;
-    }
-
+    .btn-outline-primary,
+    .btn-outline-secondary,
     .btn-danger {
         border-radius: 10px;
         font-weight: 700;
@@ -101,6 +109,11 @@
         font-weight: 800;
         margin-bottom: 12px;
         color: #fff;
+    }
+
+    /* Make muted small text visible on dark background */
+    .text-muted {
+        color: rgba(200,210,220,0.75) !important;
     }
 </style>
 
@@ -152,7 +165,7 @@
         }
         else
         {
-            <table class="table table-bordered table-hover">
+            <table class="table table-bordered table-hover table-striped">
                 <thead>
                     <tr>
                         <th>Room</th>
@@ -211,7 +224,7 @@
                                 }
                             </td>
 
-                            <!-- CANCEL BUTTON ONLY — no Details button -->
+                            <!-- CANCEL BUTTON -->
                             <td>
                                 <form asp-controller="Booking" asp-action="Cancel" method="post"
                                       onsubmit="return confirm('Cancel this booking?');">
@@ -237,7 +250,7 @@
         }
         else
         {
-            <table class="table table-striped table-bordered">
+            <table class="table table-striped table-bordered table-hover">
                 <thead>
                     <tr>
                         <th>Room</th>
@@ -300,7 +313,6 @@
             </table>
         }
     </div>
-
 </div>
 
 @section Scripts {

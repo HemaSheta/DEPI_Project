@@ -168,7 +168,7 @@
 
             <div class="detail-row">
                 <div class="detail-left">
-                    <div class="info-line"><strong>Email:</strong> <span class="muted">@Model.IdentityUser?.Email ?? "—"</span></div>
+                    <div class="info-line"><strong>Email:</strong> <span class="muted">@Model.IdentityUser?.Email</span></div>
                     <div class="info-line"><strong>Name:</strong> <span class="muted">@(profile != null ? $"{profile.FirstName} {profile.LastName}" : "—")</span></div>
                     <div class="info-line"><strong>Phone:</strong> <span class="muted">@(profile?.Phone ?? "—")</span></div>
                 </div>
@@ -186,7 +186,7 @@
 
             <div class="meta-grid">
                 <div>
-                    <div class="info-line"><strong>Room:</strong> <span class="muted">@Model.Room?.RoomType?.RoomTypeName ?? "—"</span></div>
+                    <div class="info-line"><strong>RoomType:</strong> <span class="muted">@Model.Room?.RoomType?.RoomTypeName</span></div>
                     <div class="info-line"><strong>Room #:</strong> <span class="muted">#@(Model.Room?.RoomNum ?? Model.RoomId)</span></div>
                 </div>
 
